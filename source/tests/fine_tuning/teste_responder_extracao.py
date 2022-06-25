@@ -12,51 +12,58 @@ from time import strftime
 # para execução direta
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
-import responder_extracao  # pylint: disable=wrong-import-position # precisa dos sys.path antes
-from modelo_reader import lista_modelos_reader  # pylint: disable=wrong-import-position # precisa dos sys.path antes
-import util_modelo
+from source.fine_tuning import responder_extracao  # pylint: disable=wrong-import-position # precisa dos sys.path antes
+from source.fine_tuning.modelo_reader import lista_modelos_reader  # pylint: disable=wrong-import-position # precisa dos sys.path antes
+from source.fine_tuning import trata_reader as alvo # pylint: disable=wrong-import-position # precisa dos sys.path antes
+
+from source.fine_tuning import util_modelo
 
 
 json_resposta_esperada_topk_1 = {'texto_resposta': 'Flamengo,',
 'score': 0.8342542052268982,
-'lista_referencia': [['uuid 2', 22, 31]]}
+'lista_referencia': [[22, 31]]}
 
+"""
 json_resposta_esperada_topk_2 = [{'texto_resposta': 'Flamengo,',
   'score': 0.8342542052268982,
-  'lista_referencia': [['uuid 2', 22, 31]]}]
+  'lista_referencia': [[22, 31]]}]
+"""
+
+json_resposta_esperada_topk_2 = [{'texto_resposta': 'Flamengo,',
+ 'score': 0.8342542052268982, 'lista_referencia': [[22, 31]]},
+{'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
+ 'score': 0.064724400639534, 'lista_referencia': [[22, 131]]}]
 
 json_resposta_esperada_topk_9 = [
  {'texto_resposta': 'Flamengo,',
  'score': 0.8461036747321486,
- 'lista_referencia': [['uuid 2', 22, 31], ['uuid 3', 26, 35]]},
+ 'lista_referencia': [[22, 31], [122, 131]]},
+ {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
+ 'score': 0.06712984014302492,
+ 'lista_referencia': [[22, 131]]},
  {'texto_resposta': 'o Flamengo,',
  'score': 0.005499169230461121,
- 'lista_referencia': [['uuid 2', 20, 31]]},
+ 'lista_referencia': [[20, 31]]},
  {'texto_resposta': 'Flamengo, melhor time do Brasil,',
  'score': 0.0019257370731793344,
- 'lista_referencia': [['uuid 2', 22, 54]]},
- {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores.', 'score': 0.0011339493794366717,
-  'lista_referencia': [['uuid 2', 22, 94]]}]
+ 'lista_referencia': [[22, 54]]},
+ {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores.',
+ 'score': 0.0011339493794366717,
+ 'lista_referencia': [[22, 95]]}
+ ]
 
-json_exemplo_multiplos_documentos =  {
+json_exemplo =  {
    "texto_pergunta": "Qual o melhor time do Brasil?",
    "top_k_reader":3,
    "tamanho_max_resposta" : 40,
-   "lista_documento": [  # na ordem de relevância com a pergunta
-    {
-       "cod": "uuid 2",
-       "texto": "Por causa da chuva, o Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores."},
-    {
-       "cod": "uuid 3",
-       "texto": "Há muitos torcedores pelo Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinha a honra de ser flamenguista. "},
-    {
-       "cod": "uuid 1",
-       "texto": "Ontem, quando reli os documentos do tribunal, \n descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."},
-             ]
+   "texto_contexto": "Por causa da chuva, o Flamengo, melhor \
+time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo \
+Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinha a honra \
+de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
+ descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
     }
 
-
-json_exemplo_multiplos_documentos['sigla_modelo_reader'] = lista_modelos_reader[0]
+json_exemplo['sigla_modelo_reader'] = lista_modelos_reader[0]
 
 def are_two_lists_equals(list1: list, list2: list) -> bool:
     """
@@ -75,11 +82,11 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
     teste de resposta por extração
     """
 
-    json_exemplo_multiplos_documentos["sigla_modelo"] = parm_sigla_modelo_reader
+    json_exemplo["sigla_modelo"] = parm_sigla_modelo_reader
 
-    json_exemplo_multiplos_documentos["top_k_reader"] = 1
+    json_exemplo["top_k_reader"] = 1
     caso_teste = 'teste trazer 1 resposta'
-    resposta =  responder_extracao.responder_extracao( json_exemplo_multiplos_documentos)
+    resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(f" Modelo: {parm_sigla_modelo_reader}; resultado: {resposta}")
     caso_teste = 'teste responder multiplos documentos - trazer todos top_k_reader=3'
     if len(resposta['lista_sugestao_resposta']) != 1:
@@ -87,31 +94,31 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
                                             'Esperados: 1 resposta '])
 
     caso_teste = 'teste estrutura resposta ok'
-    msg_dif = utils.compare_dicionarios_chaves(json_resposta_esperada_topk_1, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
+    msg_dif = util_modelo.compare_dicionarios_chaves(json_resposta_esperada_topk_1, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
     if msg_dif != "":
         parm_teste_objeto.lista_verification_errors.append([caso_teste, 'Retornada estrutura dif do esperado: '+ msg_dif])
 
     caso_teste = 'teste valor resposta ok'
-    msg_dif = utils.compare_dicionarios(json_resposta_esperada_topk_1, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
+    msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_1, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
     if msg_dif != "":
         parm_teste_objeto.lista_verification_errors.append([caso_teste,
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
 
 
     caso_teste = 'teste responder multiplos respostas concatenadas na referência- quantidade 2'
-    json_exemplo_multiplos_documentos["top_k_reader"] = 2
-    resposta =  responder_extracao.responder_extracao( json_exemplo_multiplos_documentos)
+    json_exemplo["top_k_reader"] = 2
+    resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(resposta)
 
-    # msg_dif = utils.compare_dicionarios(json_resposta_esperada_topk_2, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
+    # msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_2, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
     se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_2, resposta['lista_sugestao_resposta'],)
     if not se_iguais:
         parm_teste_objeto.lista_verification_errors.append([caso_teste,
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
 
     caso_teste = 'teste responder multiplos documentos - quantidade 9'
-    json_exemplo_multiplos_documentos["top_k_reader"] = 9
-    resposta =  responder_extracao.responder_extracao( json_exemplo_multiplos_documentos)
+    json_exemplo["top_k_reader"] = 9
+    resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(resposta)
     se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_9, resposta['lista_sugestao_resposta'],)
     if not se_iguais:
@@ -129,13 +136,13 @@ def teste_limite_topk_reader(parm_teste_objeto, parm_sigla_modelo_reader: str):
     """
 
 
-    json_exemplo_multiplos_documentos["sigla_modelo"] = parm_sigla_modelo_reader
+    json_exemplo["sigla_modelo"] = parm_sigla_modelo_reader
 
 
     for limite in range(1, 1000, 5):
         # caso_teste = f'{limite} teste responder multiplos documentos - quantidade enorme'
-        json_exemplo_multiplos_documentos["top_k_reader"] = limite
-        resposta =  responder_extracao.responder_extracao( json_exemplo_multiplos_documentos)
+        json_exemplo["top_k_reader"] = limite
+        resposta =  responder_extracao.responder_extracao( json_exemplo)
         print(f"limite {limite} len(resposta['lista_sugestao_resposta']) {len(resposta['lista_sugestao_resposta'])}")
 
 

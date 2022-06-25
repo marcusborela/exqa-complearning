@@ -5,7 +5,7 @@ import time
 from copy import deepcopy
 from typing import  List, Dict
 
-from  code.fine_tuning.trata_reader import Reader
+from  source.fine_tuning.trata_reader import Reader
 
 # para usar novo modelo, precisa atualizar tabela tratar_reader.prediction_tokens com vtoken_false e vtoken_true
 

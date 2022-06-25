@@ -7,7 +7,7 @@ from copy import deepcopy
 import os, sys
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
-from  code.fine_tuning import modelo_reader, util_modelo
+from  source.fine_tuning import modelo_reader, util_modelo
 
 __esquema_json ={
     "definitions": {},
@@ -113,32 +113,15 @@ json_exemplo =  {
    "texto_pergunta": "Qual o melhor time do Brasil?",
    "top_k_reader":3,
    "tamanho_max_resposta" : 40,
-   "lista_documento": [
-    {
-       "cod": "uuid 1",
-       "texto": "Ontem, quando reli os documentos do tribunal, \n descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."},
-    {
-       "cod": "uuid 2",
-       "texto": "Por causa da chuva, o Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores."},
-    {
-       "cod": "uuid 3",
-       "texto": "Há muitos torcedores pelo Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinha a honra de ser flamenguista. "}
-             ]
+   "texto_contexto": "Por causa da chuva, o Flamengo, melhor \
+time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo \
+Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinha a honra \
+de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
+ descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
     }
 
 json_exemplo['sigla_modelo_reader'] = modelo_reader.lista_modelos_reader[0]
 
-
-def formata_lista_retrieved_com_texto(parm_lista_retrieved:list, parm_lista_com_texto:list) -> list:
-    list_doctos_ordem_retrieved = []
-    for docto_retrieved in parm_lista_retrieved:
-      for docto_parametro in parm_lista_com_texto:
-        if docto_parametro['cod'] == docto_retrieved['cod']:
-          documento = util_modelo.ClassDocto(id_docto=docto_parametro['cod'], text=docto_parametro['texto'])
-          documento.score = docto_retrieved['score']
-          list_doctos_ordem_retrieved.append(documento)
-          break
-    return list_doctos_ordem_retrieved
 
 def responder_extracao(parm_json:dict):
     """
@@ -149,30 +132,19 @@ def responder_extracao(parm_json:dict):
     lista_sugestao_resposta: [
         [{'texto_resposta': 'xxxx'},
          'score': 9999,  # acumulado
-         'lista_referencia':[['uuid 2', 56, 65], ...]
-         # 'lista_referencia_global':[['uuid 2', 156, 165], ...]
     ]
-    lista_contexto: [{'cod':id_docto, 'score': score}]
+    contexto: ['xxxx']
     """
-    if 'lista_documento' not in parm_json:
-        raise Exception(f' json sem chave lista_documento. Apenas: {parm_json.keys()}')
     if 'texto_pergunta' not in parm_json:
         raise Exception(f' json sem chave texto_pergunta. Apenas: {parm_json.keys()}')
-
     if "tamanho_max_resposta" not in parm_json:
       parm_json["tamanho_max_resposta"] = 40
-
     if parm_json['top_k_reader'] == 0:
         parm_json['top_k_reader'] = 2
 
     resultado = {}
-
-    resultado['lista_contexto'] = parm_json['lista_documento']
-
-    list_doctos_ordenada = parm_json['lista_documento'] # formata_lista_retrieved_com_texto(lista_docto_retriever, parm_json['lista_documento'])
-
-    query_busca = util_modelo.Query(parm_json['texto_pergunta'])
-    resultado['lista_sugestao_resposta'] = modelo_reader.reader[parm_json['sigla_modelo_reader']].answer(query_busca, \
-            list_doctos_ordenada, parm_topk=parm_json['top_k_reader'], parm_max_answer_length=parm_json['tamanho_max_resposta'])
+    resultado['lista_sugestao_resposta'] = modelo_reader.reader[parm_json['sigla_modelo_reader']].answer(texto_pergunta=parm_json['texto_pergunta'], \
+            texto_contexto=parm_json['texto_contexto'], parm_topk=parm_json['top_k_reader'], \
+            parm_max_answer_length=parm_json['tamanho_max_resposta'])
 
     return resultado
