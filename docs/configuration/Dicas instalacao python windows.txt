@@ -11,4 +11,10 @@ Para instalar libraries em um env:
     executar comandos de conda  
         conda env list
         conda activate exqa-complearning
+
+
+Para configurar vscod para jupyter
+conda activate exqa-complearning        
 pip install -U ipykernel
+conda install -n exqa-complearning ipykernel --update-deps --force-reinstall
+
