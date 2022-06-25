@@ -9,3 +9,10 @@
 temp.properties
 temp/*
 mlruns/*
+pylint-report.txt
+*.log
+*.pyc
+models/*/*/*/*.bin
+models/*/*/*/*.msgpack
+models/*/*/*/*.h5
+coverage_html_report/

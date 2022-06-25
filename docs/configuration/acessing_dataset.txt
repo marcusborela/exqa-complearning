@@ -1,3 +1,6 @@
+
+Ver code/configuration/configuration.ipynb
+
 In data\dataset\squad_v1_1
     wget https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1.json
     wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json
