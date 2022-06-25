@@ -9,7 +9,7 @@ Extractive Q&amp;A - Performance Comparison between Learning Methods:  Context L
 **Teachers:** Roberto de Alencar Lotufo e Rodrigo Frassetto Nogueira
 
 ## Documentação do projeto
-* [Apresentação inicial 23/06/2022](https://miro.com/app/board/uXjVOr04EAw=/?share_link_id=606867964752)
+* [Apresentação inicial 23/06/2022](https://miro.com/app/board/uXjVOr04EAw=/?share_link_id=606867964752) [pdf](https://github.com//marcusborela/exqa-complearning/blob/main/docs/presentations/CompLearningExQA-Presentation-20220623.pdf)
 
 ## Metodology
 

@@ -1,0 +1,11 @@
+*__pycache__*
+*.pytest_cache*
+.coverage
+*.code-workspace
+*checkpoint.ipynb
+.idea/
+.vscode/
+*.pyc
+temp.properties
+temp/*
+mlruns/*
