@@ -1,0 +1,14 @@
+Baixar versão miniconda python 3.7 em https://docs.conda.io/en/latest/miniconda.html
+Instalar em pasta padrão (C:\Users\borela\Miniconda3)
+
+Entrar comandos via prompt do anaconda
+
+conda create -y -n exqa-complearning python=3.7
+# conda remove --name exqa-complearning --all
+
+Para instalar libraries em um env:
+    iniciar anaconda prompt 
+    executar comandos de conda  
+        conda env list
+        conda activate exqa-complearning
+pip install -U ipykernel
