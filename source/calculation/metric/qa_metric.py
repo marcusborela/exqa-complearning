@@ -1,10 +1,10 @@
-""" 
+"""
 QA Metrics
 
 Fonte apoio:
  https://qa.fastforwardlabs.com/no%20answer/null%20threshold/bert/distilbert/exact%20match/f1/robust%20predictions/2020/06/09/Evaluating_BERT_on_SQuAD.html#Metrics-for-QA
 
- Official evaluation script for v1.1 of the SQuAD dataset. 
+ Official evaluation script for v1.1 of the SQuAD dataset.
     wget https://github.com/allenai/bi-att-flow/archive/master.zip
         paste:  bi-att-flow-master\squad
 
@@ -23,8 +23,13 @@ Let's see how these metrics work in practice. We'll load up a fine-tuned model (
 import string
 
 exclude = set(string.punctuation)
+import re
+print("nova importação")
+m = re.search('(?<=abc)def', 'abcdef')
+print(m.group(0))
 
 def normalize_answer(s):
+
     """Lower text and remove punctuation, articles and extra whitespace."""
     def remove_articles(text):
         return re.sub(r'\b(a|an|the)\b', ' ', text)
@@ -51,25 +56,17 @@ def f1_score(prediction, ground_truth):
     # if either the prediction or the truth is no-answer then f1 = 1 if they agree, 0 otherwise
     if len(pred_tokens) == 0 or len(truth_tokens) == 0:
         return int(pred_tokens == truth_tokens)
-    
+
     common_tokens = set(pred_tokens) & set(truth_tokens)
     num_same = len(common_tokens)
     # if there are no common tokens then f1 = 0
     if len(common_tokens) == 0:
         return 0
-    
+
     prec = 1.0 * num_same / len(pred_tokens)
     rec = 1.0 * num_same / len(truth_tokens)
-    
+
     return 2 * (prec * rec) / (prec + rec)
-
-
-def exact_match_score(prediction, ground_truth):
-    return (normalize_answer(prediction) == normalize_answer(ground_truth))
-
-
-"""
-To be used: 
 
 def metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
     scores_for_ground_truths = []
@@ -78,17 +75,31 @@ def metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
         scores_for_ground_truths.append(score)
     return max(scores_for_ground_truths)
 
+def metric_score_over_ground_truths(metric_fn, prediction, ground_truths):
+    scores_for_ground_truths = []
+    for ground_truth in ground_truths:
+        score = metric_fn(prediction, ground_truth)
+        scores_for_ground_truths.append(score)
+    return scores_for_ground_truths
+
+def exact_match_score(prediction, ground_truth):
+    return int(normalize_answer(prediction) == normalize_answer(ground_truth))
+
+
+"""
+To be used:
+
 
 def get_gold_answers(example):
-    """helper function that retrieves all possible true answers from a squad2.0 example"""
-    
+    #helper function that retrieves all possible true answers from a squad2.0 example
+
     gold_answers = [answer["text"] for answer in example.answers if answer["text"]]
 
-    # if gold_answers doesn't exist it's because this is a negative example - 
+    # if gold_answers doesn't exist it's because this is a negative example -
     # the only correct answer is an empty string
     if not gold_answers:
         gold_answers = [""]
-        
+
     return gold_answers
 
 """
