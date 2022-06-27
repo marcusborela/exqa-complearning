@@ -143,7 +143,7 @@ def responder_extracao(parm_json:dict):
         parm_json['top_k_reader'] = 2
 
     resultado = {}
-    resultado['lista_sugestao_resposta'] = modelo_reader.reader[parm_json['sigla_modelo_reader']].answer(texto_pergunta=parm_json['texto_pergunta'], \
+    resultado = modelo_reader.reader[parm_json['sigla_modelo_reader']].answer(texto_pergunta=parm_json['texto_pergunta'], \
             texto_contexto=parm_json['texto_contexto'], parm_topk=parm_json['top_k_reader'], \
             parm_max_answer_length=parm_json['tamanho_max_resposta'])
 

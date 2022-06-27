@@ -85,11 +85,8 @@ def metric_score_over_ground_truths(metric_fn, prediction, ground_truths):
 def exact_match_score(prediction, ground_truth):
     return int(normalize_answer(prediction) == normalize_answer(ground_truth))
 
-
 """
-To be used:
-
-
+se envolver squad2.0
 def get_gold_answers(example):
     #helper function that retrieves all possible true answers from a squad2.0 example
 
@@ -101,5 +98,4 @@ def get_gold_answers(example):
         gold_answers = [""]
 
     return gold_answers
-
 """

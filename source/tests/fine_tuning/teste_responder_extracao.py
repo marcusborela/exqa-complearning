@@ -89,17 +89,17 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
     resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(f" Modelo: {parm_sigla_modelo_reader}; resultado: {resposta}")
     caso_teste = 'teste responder multiplos documentos - trazer todos top_k_reader=3'
-    if len(resposta['lista_sugestao_resposta']) != 1:
-        parm_teste_objeto.lista_verification_errors.append([caso_teste, 'Retornadas: '+ str(len(resposta['lista_sugestao_resposta'])) + ' respostas',
+    if len(resposta) != 1:
+        parm_teste_objeto.lista_verification_errors.append([caso_teste, 'Retornadas: '+ str(len(resposta)) + ' respostas',
                                             'Esperados: 1 resposta '])
 
     caso_teste = 'teste estrutura resposta ok'
-    msg_dif = util_modelo.compare_dicionarios_chaves(json_resposta_esperada_topk_1, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
+    msg_dif = util_modelo.compare_dicionarios_chaves(json_resposta_esperada_topk_1, resposta[0],"Esperado", "Encontrado")
     if msg_dif != "":
         parm_teste_objeto.lista_verification_errors.append([caso_teste, 'Retornada estrutura dif do esperado: '+ msg_dif])
 
     caso_teste = 'teste valor resposta ok'
-    msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_1, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
+    msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_1, resposta[0],"Esperado", "Encontrado")
     if msg_dif != "":
         parm_teste_objeto.lista_verification_errors.append([caso_teste,
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
@@ -110,8 +110,8 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
     resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(resposta)
 
-    # msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_2, resposta['lista_sugestao_resposta'][0],"Esperado", "Encontrado")
-    se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_2, resposta['lista_sugestao_resposta'],)
+    # msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_2, resposta[0],"Esperado", "Encontrado")
+    se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_2, resposta,)
     if not se_iguais:
         parm_teste_objeto.lista_verification_errors.append([caso_teste,
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
@@ -120,7 +120,7 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
     json_exemplo["top_k_reader"] = 9
     resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(resposta)
-    se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_9, resposta['lista_sugestao_resposta'],)
+    se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_9, resposta,)
     if not se_iguais:
         parm_teste_objeto.lista_verification_errors.append([caso_teste,
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
@@ -143,7 +143,7 @@ def teste_limite_topk_reader(parm_teste_objeto, parm_sigla_modelo_reader: str):
         # caso_teste = f'{limite} teste responder multiplos documentos - quantidade enorme'
         json_exemplo["top_k_reader"] = limite
         resposta =  responder_extracao.responder_extracao( json_exemplo)
-        print(f"limite {limite} len(resposta['lista_sugestao_resposta']) {len(resposta['lista_sugestao_resposta'])}")
+        print(f"limite {limite} len(resposta) {len(resposta)}")
 
 
 class TestEndPoint(unittest.TestCase):
