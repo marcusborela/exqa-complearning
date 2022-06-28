@@ -92,6 +92,7 @@ class Reader(): # pylint: disable=missing-class-docstring
         self.pipe = pipeline("question-answering", model=self.model, tokenizer=self.tokenizer,\
                              device=0, framework='pt')
         self.doc_stride = 30
+        self.handle_impossible_answer = False
 
     @staticmethod
     def get_model(pretrained_model_name_or_path: str, # pylint: disable=missing-function-docstring
@@ -112,7 +113,7 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         respostas = self.pipe(question=texto_pergunta,
             context=texto_contexto,
-            handle_impossible_answer=True,
+            handle_impossible_answer=self.handle_impossible_answer,
             topk=parm_topk,
             doc_stride = self.doc_stride,
             max_seq_len = self.model.config.max_position_embeddings,

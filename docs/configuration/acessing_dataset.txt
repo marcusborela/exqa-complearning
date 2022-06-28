@@ -1,6 +1,17 @@
-
 Ver code/configuration/configuration.ipynb
 
 In data\dataset\squad_v1_1
     wget https://rajpurkar.github.io/SQuAD-explorer/dataset/train-v1.1.json
     wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json
+
+
+SQuAD em português
+(crédito: grupo Deep Learning Brasil): tradução automática para o português pelo Google Tradutor do dataset SQuAD v1.1 em inglês 8 e ficou uns 2 meses fazendo revisão e algumas correções (fonte da informação)
+Link: squad-pt.tar.gz no Google Drive
+https://drive.google.com/file/d/1Q0IaIlv2h2BC468MwUFmUST0EyN7gNkn/view9
+
+
+Importante: confirmar se a resposta está no texto
+
+Outra opção, usar datasets do hf
+

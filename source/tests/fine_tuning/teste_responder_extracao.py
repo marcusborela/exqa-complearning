@@ -13,7 +13,7 @@ from time import strftime
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
 from source.fine_tuning import responder_extracao  # pylint: disable=wrong-import-position # precisa dos sys.path antes
-from source.fine_tuning.modelo_reader import lista_modelos_reader  # pylint: disable=wrong-import-position # precisa dos sys.path antes
+from source.fine_tuning.modelo_reader import sigla_reader_pt   # pylint: disable=wrong-import-position # precisa dos sys.path antes
 from source.fine_tuning import trata_reader as alvo # pylint: disable=wrong-import-position # precisa dos sys.path antes
 
 from source.fine_tuning import util_modelo
@@ -54,7 +54,7 @@ json_resposta_esperada_topk_9 = [
 
 json_exemplo =  {
    "texto_pergunta": "Qual o melhor time do Brasil?",
-   "top_k_reader":3,
+   "top_k":3,
    "tamanho_max_resposta" : 40,
    "texto_contexto": "Por causa da chuva, o Flamengo, melhor \
 time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo \
@@ -63,7 +63,7 @@ de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
  descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
     }
 
-json_exemplo['sigla_modelo_reader'] = lista_modelos_reader[0]
+json_exemplo['sigla_modelo_reader'] = sigla_reader_pt
 
 def are_two_lists_equals(list1: list, list2: list) -> bool:
     """
@@ -84,11 +84,11 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
 
     json_exemplo["sigla_modelo"] = parm_sigla_modelo_reader
 
-    json_exemplo["top_k_reader"] = 1
+    json_exemplo["top_k"] = 1
     caso_teste = 'teste trazer 1 resposta'
     resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(f" Modelo: {parm_sigla_modelo_reader}; resultado: {resposta}")
-    caso_teste = 'teste responder multiplos documentos - trazer todos top_k_reader=3'
+    caso_teste = 'teste responder multiplos documentos - trazer todos top_k=3'
     if len(resposta) != 1:
         parm_teste_objeto.lista_verification_errors.append([caso_teste, 'Retornadas: '+ str(len(resposta)) + ' respostas',
                                             'Esperados: 1 resposta '])
@@ -106,7 +106,7 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
 
 
     caso_teste = 'teste responder multiplos respostas concatenadas na referência- quantidade 2'
-    json_exemplo["top_k_reader"] = 2
+    json_exemplo["top_k"] = 2
     resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(resposta)
 
@@ -117,7 +117,7 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
 
     caso_teste = 'teste responder multiplos documentos - quantidade 9'
-    json_exemplo["top_k_reader"] = 9
+    json_exemplo["top_k"] = 9
     resposta =  responder_extracao.responder_extracao( json_exemplo)
     # print(resposta)
     se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_9, resposta,)
@@ -141,7 +141,7 @@ def teste_limite_topk_reader(parm_teste_objeto, parm_sigla_modelo_reader: str):
 
     for limite in range(1, 1000, 5):
         # caso_teste = f'{limite} teste responder multiplos documentos - quantidade enorme'
-        json_exemplo["top_k_reader"] = limite
+        json_exemplo["top_k"] = limite
         resposta =  responder_extracao.responder_extracao( json_exemplo)
         print(f"limite {limite} len(resposta) {len(resposta)}")
 
@@ -171,14 +171,8 @@ class TestEndPoint(unittest.TestCase):
         casos de testes a realizar
         """
         teste_realizado=False
-        for sigla_modelo in lista_modelos_reader:
-            if sigla_modelo == "pierreguillou/bert-large-cased-squad-v1.1-portuguese":
-                teste_realizado = True
-                # teste_limite_topk_reader(self, sigla_modelo )
-                teste_responder_extracao(self, sigla_modelo)
-                break
-        if not teste_realizado:
-            raise Exception("Sem modelo com respostas conhecidas para testes")
+        # teste_limite_topk_reader(self, sigla_modelo )
+        teste_responder_extracao(self, sigla_reader_pt)
 
 
 

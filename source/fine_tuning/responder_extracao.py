@@ -18,7 +18,7 @@ __esquema_json ={
   "required": [
     "sigla_modelo_reader",
     "texto_pergunta",
-    "top_k_reader",
+    "top_k",
     "lista_documento"
   ],
   "properties": {
@@ -42,9 +42,9 @@ __esquema_json ={
       ],
       "pattern": ".*"
     },
-    "top_k_reader": {
-      "$id": "#root/top_k_reader",
-      "title": "top_k_reader",
+    "top_k": {
+      "$id": "#root/top_k",
+      "title": "top_k",
       "type": "number",
       "multipleOf" : 1,
       "minimum": 1,
@@ -111,7 +111,7 @@ __esquema_json['properties']['sigla_modelo_reader']['pattern'] = modelo_reader.r
 
 json_exemplo =  {
    "texto_pergunta": "Qual o melhor time do Brasil?",
-   "top_k_reader":3,
+   "top_k":3,
    "tamanho_max_resposta" : 40,
    "texto_contexto": "Por causa da chuva, o Flamengo, melhor \
 time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo \
@@ -120,7 +120,7 @@ de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
  descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
     }
 
-json_exemplo['sigla_modelo_reader'] = modelo_reader.lista_modelos_reader[0]
+json_exemplo['sigla_modelo_reader'] = modelo_reader.sigla_reader_pt
 
 
 def responder_extracao(parm_json:dict):
@@ -139,12 +139,12 @@ def responder_extracao(parm_json:dict):
         raise Exception(f' json sem chave texto_pergunta. Apenas: {parm_json.keys()}')
     if "tamanho_max_resposta" not in parm_json:
       parm_json["tamanho_max_resposta"] = 40
-    if parm_json['top_k_reader'] == 0:
-        parm_json['top_k_reader'] = 2
+    if parm_json['top_k'] == 0:
+        parm_json['top_k'] = 2
 
     resultado = {}
     resultado = modelo_reader.reader[parm_json['sigla_modelo_reader']].answer(texto_pergunta=parm_json['texto_pergunta'], \
-            texto_contexto=parm_json['texto_contexto'], parm_topk=parm_json['top_k_reader'], \
+            texto_contexto=parm_json['texto_contexto'], parm_topk=parm_json['top_k'], \
             parm_max_answer_length=parm_json['tamanho_max_resposta'])
 
     return resultado
