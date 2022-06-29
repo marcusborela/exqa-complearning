@@ -1,60 +1,36 @@
-""" 
-Official evaluation script for v1.1 of the SQuAD dataset. 
-
-wget https://github.com/allenai/bi-att-flow/archive/master.zip
-    paste:  bi-att-flow-master\squad
-
-"""
+import time
+import copy
 
 
-from __future__ import print_function
-from collections import Counter
-import string
-import re
-import argparse
-import json
-import sys
+from source.calculation.metric import qa_metric
+from source.fine_tuning import responder_extracao
 
-
-
-def evaluate(dataset, predictions):
+def evaluate_finetuning(parm_dataset, parm_reader):
+    json_fine_tuning = copy.deepcopy(responder_extracao.json_extracao_resposta)
+    json_fine_tuning["tamanho_max_resposta"] = 30
+    json_fine_tuning["top_k"] = 3
+    qtd_pergunta=0
     f1 = exact_match = total = 0
-    for article in dataset:
+    tstart = time.time()
+    for article in parm_dataset:
         for paragraph in article['paragraphs']:
+            json_fine_tuning['texto_contexto'] = paragraph['context']
             for qa in paragraph['qas']:
+                qtd_pergunta += 1
                 total += 1
-                if qa['id'] not in predictions:
-                    message = 'Unanswered question ' + qa['id'] + \
-                              ' will receive score 0.'
-                    print(message, file=sys.stderr)
-                    continue
+                # calcular resposta
+                json_fine_tuning['texto_pergunta'] = qa['question']
+                resposta = responder_extracao.responder(parm_reader, json_fine_tuning)
+                # print(f"resposta {resposta}")
+                resposta_predita = resposta[0]['texto_resposta']
                 ground_truths = list(map(lambda x: x['text'], qa['answers']))
-                prediction = predictions[qa['id']]
-                exact_match += metric_max_over_ground_truths(
-                    exact_match_score, prediction, ground_truths)
-                f1 += metric_max_over_ground_truths(
-                    f1_score, prediction, ground_truths)
-
+                exact_match += qa_metric.metric_max_over_ground_truths(
+                    qa_metric.exact_match_score, resposta_predita, ground_truths)
+                f1 += qa_metric.metric_max_over_ground_truths(
+                    qa_metric.f1_score, resposta_predita, ground_truths)
+    tend = time.time()
     exact_match = 100.0 * exact_match / total
     f1 = 100.0 * f1 / total
-
-    return {'exact_match': exact_match, 'f1': f1}
-
-
-if __name__ == '__main__':
-    expected_version = '1.1'
-    parser = argparse.ArgumentParser(
-        description='Evaluation for SQuAD ' + expected_version)
-    parser.add_argument('dataset_file', help='Dataset file')
-    parser.add_argument('prediction_file', help='Prediction File')
-    args = parser.parse_args()
-    with open(args.dataset_file) as dataset_file:
-        dataset_json = json.load(dataset_file)
-        if (dataset_json['version'] != expected_version):
-            print('Evaluation expects v-' + expected_version +
-                  ', but got dataset with v-' + dataset_json['version'],
-                  file=sys.stderr)
-        dataset = dataset_json['data']
-    with open(args.prediction_file) as prediction_file:
-        predictions = json.load(prediction_file)
-    print(json.dumps(evaluate(dataset, predictions)))
+    dict_return = {'exact_match': round(exact_match,4), 'f1': round(f1,4), 'duration': round(tend - tstart, 4), 'questions':qtd_pergunta }
+    print(f"{dict_return}")
+    return dict_return

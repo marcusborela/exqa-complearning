@@ -13,14 +13,13 @@ from time import strftime
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
 from source.fine_tuning import responder_extracao  # pylint: disable=wrong-import-position # precisa dos sys.path antes
-from source.fine_tuning.modelo_reader import sigla_reader_pt   # pylint: disable=wrong-import-position # precisa dos sys.path antes
-from source.fine_tuning import trata_reader as alvo # pylint: disable=wrong-import-position # precisa dos sys.path antes
+from source.fine_tuning.modelo_reader import reader_pt   # pylint: disable=wrong-import-position # precisa dos sys.path antes
 
 from source.fine_tuning import util_modelo
 
 
 json_resposta_esperada_topk_1 = {'texto_resposta': 'Flamengo,',
-'score': 0.8342542052268982,
+'score': 0.834255,
 'lista_referencia': [[22, 31]]}
 
 """
@@ -29,30 +28,30 @@ json_resposta_esperada_topk_2 = [{'texto_resposta': 'Flamengo,',
   'lista_referencia': [[22, 31]]}]
 """
 
-json_resposta_esperada_topk_2 = [{'texto_resposta': 'Flamengo,',
- 'score': 0.8342542052268982, 'lista_referencia': [[22, 31]]},
-{'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
- 'score': 0.064724400639534, 'lista_referencia': [[22, 131]]}]
+json_resposta_esperada_topk_2 = [
+ {'texto_resposta': 'Flamengo,',
+ 'score': 0.834255, 'lista_referencia': [[22, 31]]},
+ {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
+ 'score': 0.064724, 'lista_referencia': [[22, 131]]}]
 
 json_resposta_esperada_topk_9 = [
- {'texto_resposta': 'Flamengo,',
- 'score': 0.8461036747321486,
+{'texto_resposta': 'Flamengo,',
+ 'score': 0.846104,
  'lista_referencia': [[22, 31], [122, 131]]},
- {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
- 'score': 0.06712984014302492,
+{'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
+ 'score': 0.06713,
  'lista_referencia': [[22, 131]]},
- {'texto_resposta': 'o Flamengo,',
- 'score': 0.005499169230461121,
+{'texto_resposta': 'o Flamengo,',
+ 'score': 0.005499,
  'lista_referencia': [[20, 31]]},
- {'texto_resposta': 'Flamengo, melhor time do Brasil,',
- 'score': 0.0019257370731793344,
+{'texto_resposta': 'Flamengo, melhor time do Brasil,',
+ 'score': 0.001926,
  'lista_referencia': [[22, 54]]},
- {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores.',
- 'score': 0.0011339493794366717,
- 'lista_referencia': [[22, 95]]}
- ]
+{'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores.',
+ 'score': 0.001134,
+ 'lista_referencia': [[22, 95]]}]
 
-json_exemplo =  {
+json_extracao_resposta =  {
    "texto_pergunta": "Qual o melhor time do Brasil?",
    "top_k":3,
    "tamanho_max_resposta" : 40,
@@ -62,8 +61,6 @@ Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinh
 de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
  descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
     }
-
-json_exemplo['sigla_modelo_reader'] = sigla_reader_pt
 
 def are_two_lists_equals(list1: list, list2: list) -> bool:
     """
@@ -77,17 +74,15 @@ def are_two_lists_equals(list1: list, list2: list) -> bool:
     text_dif = f'There are {len(diff)} differences:\n{diff[:5]}'
     return result_bool, text_dif
 
-def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
+def teste_responder(parm_teste_objeto, reader):
     """
     teste de resposta por extração
     """
 
-    json_exemplo["sigla_modelo"] = parm_sigla_modelo_reader
-
-    json_exemplo["top_k"] = 1
+    json_extracao_resposta["top_k"] = 1
     caso_teste = 'teste trazer 1 resposta'
-    resposta =  responder_extracao.responder_extracao( json_exemplo)
-    # print(f" Modelo: {parm_sigla_modelo_reader}; resultado: {resposta}")
+    resposta =  responder_extracao.responder(reader, json_extracao_resposta)
+    # print(resposta)
     caso_teste = 'teste responder multiplos documentos - trazer todos top_k=3'
     if len(resposta) != 1:
         parm_teste_objeto.lista_verification_errors.append([caso_teste, 'Retornadas: '+ str(len(resposta)) + ' respostas',
@@ -106,8 +101,8 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
 
 
     caso_teste = 'teste responder multiplos respostas concatenadas na referência- quantidade 2'
-    json_exemplo["top_k"] = 2
-    resposta =  responder_extracao.responder_extracao( json_exemplo)
+    json_extracao_resposta["top_k"] = 2
+    resposta =  responder_extracao.responder(reader, json_extracao_resposta)
     # print(resposta)
 
     # msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_2, resposta[0],"Esperado", "Encontrado")
@@ -117,8 +112,8 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
 
     caso_teste = 'teste responder multiplos documentos - quantidade 9'
-    json_exemplo["top_k"] = 9
-    resposta =  responder_extracao.responder_extracao( json_exemplo)
+    json_extracao_resposta["top_k"] = 9
+    resposta =  responder_extracao.responder(reader, json_extracao_resposta)
     # print(resposta)
     se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_9, resposta,)
     if not se_iguais:
@@ -126,7 +121,7 @@ def teste_responder_extracao(parm_teste_objeto, parm_sigla_modelo_reader: str):
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
 
 
-def teste_limite_topk_reader(parm_teste_objeto, parm_sigla_modelo_reader: str):
+def teste_limite_topk_reader(parm_teste_objeto, reader):
     """
         https://www.google.com/search?q=error+huggingface+pipeline+for+question-answering+keyerror+%22for+s%2C+e%2C+score+in+zip%28starts%2C+ends%2C+scores%29%22&rlz=1C1GCEA_enBR958BR958&biw=955&bih=1397&sxsrf=ALiCzsa6x9jMs-XL_CZ2PNIg9lSClBEOMA%3A1654871221457&ei=tVSjYpi0G4mi1sQP45uhyAo&ved=0ahUKEwjY4rbai6P4AhUJkZUCHeNNCKkQ4dUDCA4&uact=5&oq=error+huggingface+pipeline+for+question-answering+keyerror+%22for+s%2C+e%2C+score+in+zip%28starts%2C+ends%2C+scores%29%22&gs_lcp=Cgdnd3Mtd2l6EAMyBwgAEEcQsAMyBwgAEEcQsAMyBwgAEEcQsAMyBwgAEEcQsAMyBwgAEEcQsAMyBwgAEEcQsAMyBwgAEEcQsAMyBwgAEEcQsANKBAhBGABKBAhGGABQ1qIBWMTWAWCF2AFoAnABeACAAQCIAQCSAQCYAQCgAQHIAQjAAQE&sclient=gws-wiz
         https://stackoverflow.com/questions/62300836/keyerror-when-using-non-default-models-in-huggingface-transformers-pipeline
@@ -136,13 +131,12 @@ def teste_limite_topk_reader(parm_teste_objeto, parm_sigla_modelo_reader: str):
     """
 
 
-    json_exemplo["sigla_modelo"] = parm_sigla_modelo_reader
 
 
     for limite in range(1, 1000, 5):
         # caso_teste = f'{limite} teste responder multiplos documentos - quantidade enorme'
-        json_exemplo["top_k"] = limite
-        resposta =  responder_extracao.responder_extracao( json_exemplo)
+        json_extracao_resposta["top_k"] = limite
+        resposta =  responder_extracao.responder(reader, json_extracao_resposta)
         print(f"limite {limite} len(resposta) {len(resposta)}")
 
 
@@ -171,8 +165,8 @@ class TestEndPoint(unittest.TestCase):
         casos de testes a realizar
         """
         teste_realizado=False
-        # teste_limite_topk_reader(self, sigla_modelo )
-        teste_responder_extracao(self, sigla_reader_pt)
+        # teste_limite_topk_reader(self, reader_pt )
+        teste_responder(self, reader_pt)
 
 
 

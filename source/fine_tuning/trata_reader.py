@@ -69,7 +69,7 @@ def formatar_retirar_duplicatas(lista_resposta:List[Dict])-> List[Dict]:
     for answer in score.keys():
         resp = {}
         resp['texto_resposta']= answer
-        resp['score'] = score[answer]
+        resp['score'] = round(score[answer], 6) # limitando em 6 casas decimais. Até para os testes passarem.
         for referencia in lista_referencia[answer]:
             if 'lista_referencia' not in resp:
                 resp['lista_referencia'] = [[referencia[0], referencia[1]]]
@@ -89,7 +89,8 @@ class Reader(): # pylint: disable=missing-class-docstring
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.device = next(self.model.parameters(), None).device
         self.use_amp = use_amp
-        self.pipe = pipeline("question-answering", model=self.model, tokenizer=self.tokenizer,\
+        self.pipe = pipeline("question-answering", model=self.model,\
+                             tokenizer=self.tokenizer,\
                              device=0, framework='pt')
         self.doc_stride = 30
         self.handle_impossible_answer = False
@@ -114,7 +115,7 @@ class Reader(): # pylint: disable=missing-class-docstring
         respostas = self.pipe(question=texto_pergunta,
             context=texto_contexto,
             handle_impossible_answer=self.handle_impossible_answer,
-            topk=parm_topk,
+            top_k=parm_topk,
             doc_stride = self.doc_stride,
             max_seq_len = self.model.config.max_position_embeddings,
             max_question_len = len(texto_pergunta), # número de tokens.. #chars>#tokens

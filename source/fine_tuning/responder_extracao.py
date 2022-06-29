@@ -7,109 +7,8 @@ from copy import deepcopy
 import os, sys
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
-from  source.fine_tuning import modelo_reader, util_modelo
 
-__esquema_json ={
-    "definitions": {},
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://example.com/object1639600315.json",
-  "title": "Root",
-  "type": "object",
-  "required": [
-    "sigla_modelo_reader",
-    "texto_pergunta",
-    "top_k",
-    "lista_documento"
-  ],
-  "properties": {
-    "sigla_modelo_reader": {
-      "$id": "#root/sigla_modelo",
-      "title": "sigla_modelo",
-      "type": "string",
-      "default": "",
-      "examples": [
-        "unicamp-dl/mt5-base-mmarco-v2"
-      ],
-      "pattern": "^.*$"
-    },
-    "texto_pergunta": {
-      "$id": "#root/texto_pergunta",
-      "title": "texto_pergunta",
-      "type": "string",
-      "default": "",
-      "examples": [
-        "Palavras faltando: faltando 1, faltando 2"
-      ],
-      "pattern": ".*"
-    },
-    "top_k": {
-      "$id": "#root/top_k",
-      "title": "top_k",
-      "type": "number",
-      "multipleOf" : 1,
-      "minimum": 1,
-      "default": "",
-      "examples": [
-        3
-      ],
-      "pattern": "^[0-9]+$"
-    },
-    "tamanho_max_resposta": {
-      "$id": "#root/tamanho_max_resposta",
-      "title": "tamanho_max_resposta",
-      "type": "number",
-      "minimum": 1,
-      "multipleOf" : 1,
-      "default": "",
-      "examples": [
-        50
-      ],
-      "pattern": "^[0-9]+$"
-    },
-    "lista_documento": {
-      "$id": "#root/lista_documento",
-      "title": "lista_documento",
-      "type": "array",
-      "default": [],
-      "items":{
-        "$id": "#root/lista_documento/items",
-        "title": "Items",
-        "type": "object",
-        "required": [
-          "cod",
-          "texto"
-        ],
-        "properties": {
-          "cod": {
-            "$id": "#root/lista_documento/items/cod",
-            "title": "Cod",
-            "type": "string",
-            "default": "",
-            "examples": [
-              "uuid texto 1"
-            ],
-            "pattern": "^.*$"
-          },
-          "texto": {
-            "$id": "#root/lista_documento/items/texto",
-            "title": "texto",
-            "type": "string",
-            "default": "",
-            "examples": [
-              "nome - texto 1"
-            ],
-            "pattern": ".*"
-          }
-        }
-      }
-
-    }
-  }
-}
-
-__esquema_json['properties']['sigla_modelo_reader']['pattern'] = modelo_reader.regex_lista_modelo_reader_valida_json
-
-json_exemplo =  {
+json_extracao_resposta =  {
    "texto_pergunta": "Qual o melhor time do Brasil?",
    "top_k":3,
    "tamanho_max_resposta" : 40,
@@ -120,10 +19,7 @@ de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
  descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
     }
 
-json_exemplo['sigla_modelo_reader'] = modelo_reader.sigla_reader_pt
-
-
-def responder_extracao(parm_json:dict):
+def responder(parm_reader, parm_json:dict):
     """
     Calcula
 
@@ -143,7 +39,7 @@ def responder_extracao(parm_json:dict):
         parm_json['top_k'] = 2
 
     resultado = {}
-    resultado = modelo_reader.reader[parm_json['sigla_modelo_reader']].answer(texto_pergunta=parm_json['texto_pergunta'], \
+    resultado = parm_reader.answer(texto_pergunta=parm_json['texto_pergunta'], \
             texto_contexto=parm_json['texto_contexto'], parm_topk=parm_json['top_k'], \
             parm_max_answer_length=parm_json['tamanho_max_resposta'])
 
