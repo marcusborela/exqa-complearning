@@ -12,10 +12,10 @@ from time import strftime
 # para execução direta
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
-from source.fine_tuning import responder_extracao  # pylint: disable=wrong-import-position # precisa dos sys.path antes
-from source.fine_tuning.modelo_reader import reader_pt   # pylint: disable=wrong-import-position # precisa dos sys.path antes
+from source.calculation.fine_tuning import responder_extracao  # pylint: disable=wrong-import-position # precisa dos sys.path antes
+from source.calculation.fine_tuning.modelo_reader import reader_pt   # pylint: disable=wrong-import-position # precisa dos sys.path antes
 
-from source.fine_tuning import util_modelo
+from source.calculation.fine_tuning import util_modelo
 
 
 json_resposta_esperada_topk_1 = {'texto_resposta': 'Flamengo,',

@@ -3,7 +3,7 @@ import copy
 
 
 from source.calculation.metric import qa_metric
-from source.fine_tuning import responder_extracao
+from source.calculation.fine_tuning import responder_extracao
 
 def evaluate_finetuning(parm_dataset, parm_reader):
     json_fine_tuning = copy.deepcopy(responder_extracao.json_extracao_resposta)
