@@ -8,7 +8,7 @@ from typing import  List, Dict
 from transformers import AutoModelForQuestionAnswering
 from transformers import AutoTokenizer
 from transformers import pipeline
-from  source.calculation.fine_tuning.util_modelo import Text, Query
+from  source.calculation.transfer_learning.util_modelo import Text, Query
 
 # import transformers
 # print(f"transformers.__version__ {transformers.__version__}")

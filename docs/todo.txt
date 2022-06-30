@@ -1,0 +1,5 @@
+f1@N
+salvar parâmetros e resultados por modelos
+tentar descobrir parâmetros de avaliação no squad1.1 do distilbert
+salvar dataset
+tentar com batch_size?

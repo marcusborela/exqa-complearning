@@ -3,13 +3,13 @@ import copy
 
 
 from source.calculation.metric import qa_metric
-from source.calculation.fine_tuning import responder_extracao
-from source.calculation.fine_tuning.modelo_reader import reader_en, reader_pt
+from source.calculation.transfer_learning import responder_extracao
+from source.calculation.transfer_learning.modelo_reader import reader_en, reader_pt
 
 def evaluate_finetuning(parm_dataset):
-    json_fine_tuning = copy.deepcopy(responder_extracao.json_extracao_resposta)
-    json_fine_tuning["tamanho_max_resposta"] = 30
-    json_fine_tuning["top_k"] = 3
+    json_transfer_learning = copy.deepcopy(responder_extracao.json_extracao_resposta)
+    json_transfer_learning["tamanho_max_resposta"] = 30
+    json_transfer_learning["top_k"] = 3
     if parm_dataset.language == 'en':
         model = reader_en
     else:
@@ -20,13 +20,13 @@ def evaluate_finetuning(parm_dataset):
     print(model.info)
     for article in parm_dataset.data:
         for paragraph in article['paragraphs']:
-            json_fine_tuning['texto_contexto'] = paragraph['context']
+            json_transfer_learning['texto_contexto'] = paragraph['context']
             for qa in paragraph['qas']:
                 qtd_pergunta += 1
                 total += 1
                 # calcular resposta
-                json_fine_tuning['texto_pergunta'] = qa['question']
-                resposta = responder_extracao.responder(model, json_fine_tuning)
+                json_transfer_learning['texto_pergunta'] = qa['question']
+                resposta = responder_extracao.responder(model, json_transfer_learning)
                 # print(f"resposta {resposta}")
                 resposta_predita = resposta[0]['texto_resposta']
                 ground_truths = list(map(lambda x: x['text'], qa['answers']))

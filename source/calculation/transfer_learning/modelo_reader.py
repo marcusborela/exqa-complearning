@@ -5,7 +5,7 @@ import time
 from copy import deepcopy
 from typing import  List, Dict
 
-from  source.calculation.fine_tuning.trata_reader import Reader
+from  source.calculation.transfer_learning.trata_reader import Reader
 
 # para usar novo modelo, precisa atualizar tabela tratar_reader.prediction_tokens com vtoken_false e vtoken_true
 
@@ -18,7 +18,7 @@ def adicionar_modelo_reader(parm_nome:str, parm_descr:str):
     Adiciona modelo aos dicionários globais
     """
     # global reader, reader_descr, reader_mono
-    nome_caminho_modelo = "models/fine_tuning/" + parm_nome
+    nome_caminho_modelo = "models/transfer_learning/" + parm_nome
     reader[parm_nome] = Reader(pretrained_model_name_or_path=nome_caminho_modelo)
     reader_descr[parm_nome] = parm_descr
 
