@@ -92,8 +92,16 @@ class Reader(): # pylint: disable=missing-class-docstring
         self.pipe = pipeline("question-answering", model=self.model,\
                              tokenizer=self.tokenizer,\
                              device=0, framework='pt')
-        self.doc_stride = 30
+        self.doc_stride = 128
         self.handle_impossible_answer = False
+        self.max_answer_length = 30
+
+    @property
+    def info(self):
+        return {"doc_stride": self.doc_stride,\
+                "handle_impossible_answer":self.handle_impossible_answer,\
+                "max_answer_length":self.max_answer_length,\
+                "max_seq_len": self.model.config.max_position_embeddings}
 
     @staticmethod
     def get_model(pretrained_model_name_or_path: str, # pylint: disable=missing-function-docstring
@@ -110,7 +118,7 @@ class Reader(): # pylint: disable=missing-class-docstring
         return AutoTokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
 
 
-    def answer(self, texto_pergunta: str, texto_contexto: str, parm_topk:int=1, parm_max_answer_length:int=40) -> List[Dict]:
+    def answer(self, texto_pergunta: str, texto_contexto: str, parm_topk:int=1) -> List[Dict]:
 
         respostas = self.pipe(question=texto_pergunta,
             context=texto_contexto,
@@ -119,7 +127,7 @@ class Reader(): # pylint: disable=missing-class-docstring
             doc_stride = self.doc_stride,
             max_seq_len = self.model.config.max_position_embeddings,
             max_question_len = len(texto_pergunta), # número de tokens.. #chars>#tokens
-            max_answer_len = parm_max_answer_length
+            max_answer_len = self.max_answer_length
             )
         if parm_topk == 1:
             lista_respostas = [respostas]

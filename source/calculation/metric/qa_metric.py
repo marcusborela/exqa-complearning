@@ -24,9 +24,7 @@ import string
 
 exclude = set(string.punctuation)
 import re
-print("nova importação")
 m = re.search('(?<=abc)def', 'abcdef')
-print(m.group(0))
 
 def normalize_answer(s):
 

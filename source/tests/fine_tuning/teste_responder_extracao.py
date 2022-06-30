@@ -54,7 +54,6 @@ json_resposta_esperada_topk_9 = [
 json_extracao_resposta =  {
    "texto_pergunta": "Qual o melhor time do Brasil?",
    "top_k":3,
-   "tamanho_max_resposta" : 40,
    "texto_contexto": "Por causa da chuva, o Flamengo, melhor \
 time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo \
 Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinha a honra \

@@ -1,4 +1,4 @@
-# exqa-complearning  
+# exqa-complearning
 Extractive Q&amp;A - Performance Comparison between Learning Methods:  Context Learning and Fine-Tuning
 
 **Final Project at Discipline**
@@ -10,12 +10,13 @@ Extractive Q&amp;A - Performance Comparison between Learning Methods:  Context L
 
 ## Documentação do projeto
 * [Apresentação inicial 23/06/2022](https://miro.com/app/board/uXjVOr04EAw=/?share_link_id=606867964752) [pdf](https://github.com//marcusborela/exqa-complearning/blob/main/docs/presentations/CompLearningExQA-Presentation-20220623.pdf)
+* [Apresentação 30/06/2022](https://miro.com/app/board/uXjVOr04EAw=/?share_link_id=606867964752) [pdf](https://github.com//marcusborela/exqa-complearning/blob/main/docs/presentations/CompLearningExQA-Presentation-20220630.pdf)
 
 ## Metodology
 
 ## Code
 
-## Data 
+## Data
 
 ## References:
 
