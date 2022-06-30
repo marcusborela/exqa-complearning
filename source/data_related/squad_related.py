@@ -1,9 +1,12 @@
+import json
+import copy
+
 class SquadDataset(object): # pylint: disable=missing-class-docstring # código de origem externa
     def __init__(self, data, file_name:str, language):
-        self.data = data
-        self.file_name = file_name
-        self.language = language
-        self.num_questions = 10570
+        self._data = data
+        self._file_name = file_name
+        self._language = language
+        self._num_questions = 10570
 
     @property
     def data(self):
@@ -16,6 +19,10 @@ class SquadDataset(object): # pylint: disable=missing-class-docstring # código 
     @property
     def language(self):
         return self._language
+
+    @property
+    def num_questions(self):
+        return self._num_questions
 
 def avaliar_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imprimir=None):
     # parm_lista_pergunta_imprimir: exemplo repetidas ['571a52cb4faf5e1900b8a96b', '5730b9dc8ab72b1400f9c70f', '571a50df4faf5e1900b8a960']
@@ -52,12 +59,54 @@ def avaliar_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imp
                 else:
                     qtd_pergunta_repetida += 1
                     perguntas_repetidas.add(pergunta_respostas['id'])
+
+
+    print(f"Totais artigos:{qtd_artigo} paragrafos:{qtd_paragrafo} perguntas:{qtd_pergunta} respostas:{qtd_resposta}")
+    print(f"Erros perguntas: repetidas {qtd_pergunta_repetida}")
+    print(f"Erro respostas fora do texto: {qtd_erro_fora_texto} fora da posição {qtd_erro_fora_posicao}")
+
+
+def excluir_duplicata_dataset_squad_1_1(parm_dataset:SquadDataset):
+    print(f"Levantando quantitativo e verificando inconsistências no dataset {parm_dataset.file_name}")
+    qtd_erro_fora_texto = qtd_exclusao = qtd_paragrafo = qtd_artigo = qtd_resposta = qtd_erro_fora_posicao = qtd_pergunta = qtd_pergunta_repetida = 0
+    perguntas_repetidas = set()
+    qtd_respostas_para_id_pergunta = {} # deixar os pares repetidos com maior número de respostas
+    perguntas_unicas_id = set()
+    for artigo in parm_dataset.data:
+        qtd_artigo += 1
+        for paragrafo in artigo['paragraphs']:
+            contexto = paragrafo['context']
+            qtd_paragrafo += 1
+            # qas_original = copy.copy(paragrafo['qas'])
+            lista_id_a_excluir = []
+            for ndx_qas, pergunta_respostas in enumerate(paragrafo['qas']):
+                qtd_respostas_para_id_pergunta[pergunta_respostas['id']] = len(pergunta_respostas['answers'])
+                qtd_pergunta += 1
+                for resposta in pergunta_respostas['answers']:
+                    qtd_resposta += 1
+                    if resposta['text'] not in contexto:
+                        print(f"Resposta não está no texto artigo {artigo['title']} id: {pergunta_respostas['id']}")
+                        qtd_erro_fora_texto += 1
+                    if resposta['text'] != contexto[resposta['answer_start']:resposta['answer_start']+len(resposta['text'])]:
+                        qtd_erro_fora_posicao += 1
+
+                if pergunta_respostas['id'] not in perguntas_unicas_id:
+                    perguntas_unicas_id.add(pergunta_respostas['id'])
+                else:
+                    qtd_pergunta_repetida += 1
+                    perguntas_repetidas.add(pergunta_respostas['id'])
                     if qtd_respostas_para_id_pergunta[pergunta_respostas['id']] >= len(pergunta_respostas['answers']):
-                        print(f"deletado {pergunta_respostas['id']}")
-                        del paragrafo['qas'][ndx_qas]
-                        qtd_exclusao += 1
+                        lista_id_a_excluir.append(ndx_qas)
                     else:
                         print(f" qtd de repetição posterior é maior {len(pergunta_respostas['answers'])} > qtd_respostas_para_id_pergunta[pergunta_respostas['id']]")
+                if ndx_qas == len(paragrafo['qas']) - 1: # só no final do conjunto de qas para não atrapalhar o for
+                    qtd_exclusao_conjunto_qas = 0
+                    for pos_qas_excluir in lista_id_a_excluir:
+                        pos_ajustada_a_excluir = pos_qas_excluir - qtd_exclusao_conjunto_qas
+                        # print(f"Deletado pos_qas_excluir {pos_qas_excluir} id_pergunta:{paragrafo['qas'][pos_ajustada_a_excluir]['id']}")
+                        del paragrafo['qas'][pos_ajustada_a_excluir]
+                        qtd_exclusao_conjunto_qas += 1
+                        qtd_exclusao += 1
 
 
     print(f"Totais artigos:{qtd_artigo} paragrafos:{qtd_paragrafo} perguntas:{qtd_pergunta} respostas:{qtd_resposta}")
@@ -65,8 +114,9 @@ def avaliar_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imp
     print(f"Erro respostas fora do texto: {qtd_erro_fora_texto} fora da posição {qtd_erro_fora_posicao}")
 
 
+
 def imprimir_exemplo_dataset_squad_1_1(parm_dataset:SquadDataset):
-    print(f"Dataset {parm_dataset.file_name} \n#artigos: {len(dataset_en)}")
+    print(f"Dataset {parm_dataset.file_name} \n#artigos: {len(parm_dataset.data)}")
     for artigo in parm_dataset.data:
         print(f"\n****** artigo ****** \n  {artigo.keys()} \n  1o artigo \n    #paragrafos {len(artigo['paragraphs'])};\n    Artigo:\n      {artigo['title']}, ")
         for paragrafo in artigo['paragraphs']:
@@ -88,10 +138,10 @@ def carregar_squad_1_1(parm_language:str):
     assert parm_language in ['en', 'pt'], "parm_language must be in ['en', 'pt']"
     if parm_language == 'en':
         nome_dataset = 'dev-v1.1.json'
-        path_dataset_file = path_project+"data/dataset/squad/"+nome_dataset_en
+        path_dataset_file = path_project+"data/dataset/squad/"+nome_dataset
     else:
         nome_dataset = 'dev-v1.1-pt.json'
-        path_dataset_file = path_project+"data/dataset/squad/"+nome_dataset_pt
+        path_dataset_file = path_project+"data/dataset/squad/"+nome_dataset
     with open(path_dataset_file) as dataset_file:
         dataset_json = json.load(dataset_file)
         dataset = dataset_json['data']
@@ -105,6 +155,10 @@ from transformers.data.processors.squad import SquadV1Processor # SquadV2Process
 processor = SquadV1Processor()
 examples = processor.get_dev_examples(path_project+"data/dataset/squad/", filename="dev-v1.1.json")
 print(len(examples))
+
+
+from datasets import load_dataset
+dataset = load_dataset("squad_related")
 
 
 

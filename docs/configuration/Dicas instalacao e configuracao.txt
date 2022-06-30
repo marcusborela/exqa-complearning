@@ -33,5 +33,5 @@ Para baixar modelo de huggingface:
         git lfs install
 
 
-* Devido a erro ao instalar pytorch:
+* Se der erro ao instalar pytorch:
      usar conda env relevar-busca
