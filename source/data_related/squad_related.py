@@ -1,5 +1,4 @@
 import json
-import copy
 
 class SquadDataset(object): # pylint: disable=missing-class-docstring # código de origem externa
     def __init__(self, data, file_name:str, language):
@@ -66,7 +65,7 @@ def avaliar_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imp
     print(f"Erro respostas fora do texto: {qtd_erro_fora_texto} fora da posição {qtd_erro_fora_posicao}")
 
 
-def excluir_duplicata_dataset_squad_1_1(parm_dataset:SquadDataset):
+def _excluir_duplicata_dataset_squad_1_1(parm_dataset:SquadDataset):
     print(f"Levantando quantitativo e verificando inconsistências no dataset {parm_dataset.file_name}")
     qtd_erro_fora_texto = qtd_exclusao = qtd_paragrafo = qtd_artigo = qtd_resposta = qtd_erro_fora_posicao = qtd_pergunta = qtd_pergunta_repetida = 0
     perguntas_repetidas = set()
@@ -113,8 +112,6 @@ def excluir_duplicata_dataset_squad_1_1(parm_dataset:SquadDataset):
     print(f"Erros perguntas: repetidas {qtd_pergunta_repetida} excluídas {qtd_exclusao}")
     print(f"Erro respostas fora do texto: {qtd_erro_fora_texto} fora da posição {qtd_erro_fora_posicao}")
 
-
-
 def imprimir_exemplo_dataset_squad_1_1(parm_dataset:SquadDataset):
     print(f"Dataset {parm_dataset.file_name} \n#artigos: {len(parm_dataset.data)}")
     for artigo in parm_dataset.data:
@@ -146,6 +143,19 @@ def carregar_squad_1_1(parm_language:str):
         dataset_json = json.load(dataset_file)
         dataset = dataset_json['data']
     return SquadDataset(data=dataset, file_name=nome_dataset, language = parm_language)
+
+def corrige_e_salva_dataset_sem_duplicacao(parm_dataset:SquadDataset, parm_file_name):
+    """
+    Salva arquivo sem duplicatas em path_project/data/dataset/squad/
+    """
+    _excluir_duplicata_dataset_squad_1_1(parm_dataset)
+    # path_project = '~/fontes/exqa-complearning/'
+    path_project = '/home/borela/fontes/exqa-complearning/'
+    path_dataset_file = path_project+"data/dataset/squad/"+parm_file_name
+    dict_json = {"version": "1.1"}
+    dict_json['data']=parm_dataset.data
+    with open(path_dataset_file,'w', encoding='utf-8') as dataset_file:
+        json.dump(dict_json, dataset_file)
 
 """
 May be used

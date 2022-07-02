@@ -84,16 +84,17 @@ class Reader(): # pylint: disable=missing-class-docstring
     def __init__(self,
                  pretrained_model_name_or_path: str  = 'castorini/monot5-base-msmarco',
                  use_amp = False): # Automatic Mixed Precision
-        self.model = self.get_model(pretrained_model_name_or_path)
+        self.name_device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+        self.device = torch.device(self.name_device)
+        # Since we are using our model only for inference, switch to `eval` mode:
+        self.model = self.get_model(pretrained_model_name_or_path).to(self.device).eval()
         self.tokenizer = self.get_tokenizer(pretrained_model_name_or_path)
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         # self.device = next(self.model.parameters(), None).device
-        self.name_device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        self.device = torch.device(device)
         self.use_amp = use_amp
         self.pipe = pipeline("question-answering", model=self.model,\
                              tokenizer=self.tokenizer,\
-                             device=0, framework='pt')
+                             device=self.device, framework='pt')
         self.doc_stride = 128
         self.handle_impossible_answer = False
         self.max_answer_length = 30
@@ -108,14 +109,13 @@ class Reader(): # pylint: disable=missing-class-docstring
                 "max_seq_len": self.model.config.max_position_embeddings}
 
     @staticmethod
-    def get_model(pretrained_model_name_or_path: str, # pylint: disable=missing-function-docstring
+    def get_model(pretrained_model_name_or_path: str,
                   *args, **kwargs) -> AutoModelForQuestionAnswering:
-        # Since we are using our model only for inference, switch to `eval` mode:
         return AutoModelForQuestionAnswering.from_pretrained(pretrained_model_name_or_path,
-                                                          *args, **kwargs).to(device).eval()
+                                                          *args, **kwargs)
 
     @staticmethod
-    def get_tokenizer(pretrained_model_name_or_path: str, # pylint: disable=missing-function-docstring
+    def get_tokenizer(pretrained_model_name_or_path: str,
                       *args, batch_size: int = BATCH_SIZE_PADRAO, **kwargs) -> AutoTokenizer:
         return AutoTokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
 
