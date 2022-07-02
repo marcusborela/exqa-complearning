@@ -1,0 +1,5 @@
+cod,name
+EM,Exact Match
+F1,F1 Score
+EM@3,Exact Match at 3 different answers
+F1@3,F1 Score at 3 different answers

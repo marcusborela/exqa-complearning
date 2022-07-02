@@ -1,0 +1,3 @@
+Descr:"Metrics used to evaluate QA systems"
+cod:str="Metric code, unique id"
+name:str="Metric name"

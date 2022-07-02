@@ -1,0 +1,4 @@
+Descr: "Metrics got in evaluetion of lerning methods"
+cod_evaluation:int="Evaluation code"
+cod_metric:str="Metric code"
+value:float::format 99.99="Value of metric in evaluation"

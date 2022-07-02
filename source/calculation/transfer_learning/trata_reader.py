@@ -87,7 +87,9 @@ class Reader(): # pylint: disable=missing-class-docstring
         self.model = self.get_model(pretrained_model_name_or_path)
         self.tokenizer = self.get_tokenizer(pretrained_model_name_or_path)
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
-        self.device = next(self.model.parameters(), None).device
+        # self.device = next(self.model.parameters(), None).device
+        self.name_device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.device = torch.device(device)
         self.use_amp = use_amp
         self.pipe = pipeline("question-answering", model=self.model,\
                              tokenizer=self.tokenizer,\
@@ -98,16 +100,16 @@ class Reader(): # pylint: disable=missing-class-docstring
 
     @property
     def info(self):
-        return {"doc_stride": self.doc_stride,\
+        return {"name":self.pretrained_model_name_or_path,\
+                "device": self.name_device,\
+                "doc_stride": self.doc_stride,\
                 "handle_impossible_answer":self.handle_impossible_answer,\
                 "max_answer_length":self.max_answer_length,\
                 "max_seq_len": self.model.config.max_position_embeddings}
 
     @staticmethod
     def get_model(pretrained_model_name_or_path: str, # pylint: disable=missing-function-docstring
-                  *args, device: str = None, **kwargs) -> AutoModelForQuestionAnswering:
-        device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
-        device = torch.device(device) # pylint: disable=broad-except
+                  *args, **kwargs) -> AutoModelForQuestionAnswering:
         # Since we are using our model only for inference, switch to `eval` mode:
         return AutoModelForQuestionAnswering.from_pretrained(pretrained_model_name_or_path,
                                                           *args, **kwargs).to(device).eval()
