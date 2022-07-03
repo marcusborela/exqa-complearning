@@ -8,7 +8,7 @@ from typing import  List, Dict
 from transformers import AutoModelForQuestionAnswering
 from transformers import AutoTokenizer
 from transformers import pipeline
-from  source.calculation.transfer_learning.util_modelo import Text, Query
+from source.calculation import util_modelo
 
 # import transformers
 # print(f"transformers.__version__ {transformers.__version__}")
@@ -24,7 +24,6 @@ Sobre paralelismo:
 """
 os.environ['TOKENIZERS_PARALLELISM'] = "0"
 
-BATCH_SIZE_PADRAO = 16
 # para debugar erros gpu
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
@@ -82,28 +81,51 @@ def formatar_retirar_duplicatas(lista_resposta:List[Dict])-> List[Dict]:
 
 class Reader(): # pylint: disable=missing-class-docstring
     def __init__(self,
-                 pretrained_model_name_or_path: str  = 'castorini/monot5-base-msmarco',
-                 use_amp = False): # Automatic Mixed Precision
+                 pretrained_model_name_or_path: str,
+                 parm_dict_config:Dict):
+
+        self._dict_parameters_example = {"doc_stride":128,\
+                           "top_k":3,\
+                           "max_answer_length" : 30,\
+                           "handle_impossible_answer":False,
+                           # only impacts reference_list and score
+                           # used to avoid return less then top_k diferent answer
+                           "factor_multiply_top_k":1}
+
+        msg_dif = util_modelo.compare_dicionarios_chaves(self._dict_parameters_example, parm_dict_config,
+            'Esperado', 'Encontrado')
+        assert msg_dif == "", f"Estrutura esperada de parâmetros de variáveis não corresponde ao esperado {msg_dif}"
+
         self.name_device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(self.name_device)
+        # self.device = next(self.model.parameters(), None).device
+
         # Since we are using our model only for inference, switch to `eval` mode:
         self.model = self.get_model(pretrained_model_name_or_path).to(self.device).eval()
+
         self.tokenizer = self.get_tokenizer(pretrained_model_name_or_path)
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
-        # self.device = next(self.model.parameters(), None).device
-        self.use_amp = use_amp
+        # não usado # Automatic Mixed Precision self.use_amp = use_amp
         self.pipe = pipeline("question-answering", model=self.model,\
                              tokenizer=self.tokenizer,\
                              device=self.device, framework='pt')
-        self.doc_stride = 128
-        self.handle_impossible_answer = False
-        self.max_answer_length = 30
+        self.top_k = parm_dict_config["top_k"]
+        self.doc_stride = parm_dict_config["doc_stride"]
+        self.handle_impossible_answer = parm_dict_config["handle_impossible_answer"]
+        self.max_answer_length = parm_dict_config["max_answer_length"]
+        self.factor_multiply_top_k = parm_dict_config["factor_multiply_top_k"]
+
+    @property
+    def dict_parameters_example(self):
+        return self._dict_parameters_example
 
     @property
     def info(self):
         return {"name":self.pretrained_model_name_or_path,\
                 "device": self.name_device,\
+                "top_k": self.top_k,\
                 "doc_stride": self.doc_stride,\
+                "factor_multiply_top_k": self.factor_multiply_top_k,\
                 "handle_impossible_answer":self.handle_impossible_answer,\
                 "max_answer_length":self.max_answer_length,\
                 "max_seq_len": self.model.config.max_position_embeddings}
@@ -116,28 +138,34 @@ class Reader(): # pylint: disable=missing-class-docstring
 
     @staticmethod
     def get_tokenizer(pretrained_model_name_or_path: str,
-                      *args, batch_size: int = BATCH_SIZE_PADRAO, **kwargs) -> AutoTokenizer:
+                      *args, batch_size: int = 16, **kwargs) -> AutoTokenizer:
         return AutoTokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
 
 
-    def answer(self, texto_pergunta: str, texto_contexto: str, parm_topk:int=1) -> List[Dict]:
+    def answer(self, texto_pergunta: str, texto_contexto: str) -> List[Dict]:
 
         respostas = self.pipe(question=texto_pergunta,
             context=texto_contexto,
             handle_impossible_answer=self.handle_impossible_answer,
-            top_k=parm_topk,
+            # como há casos de repostas idênticas em posições diferentes,
+            # precisamos pegar mais respostas para devolver top_k
+            top_k= self.top_k*self.factor_multiply_top_k,
+            # precisa??? self.max_seq_len = self.model.config.max_position_embeddings
             doc_stride = self.doc_stride,
-            max_seq_len = self.model.config.max_position_embeddings,
             max_question_len = len(texto_pergunta), # número de tokens.. #chars>#tokens
             max_answer_len = self.max_answer_length
             )
-        if parm_topk == 1:
+
+        if not isinstance(respostas, list):
             lista_respostas = [respostas]
         else:
             lista_respostas = respostas
 
         lista_respostas = formatar_retirar_duplicatas(lista_respostas)
 
-        return lista_respostas
+        if len(lista_respostas) < self.top_k:
+            print(f"Warning: #answers=len(lista_respostas)<self.top_k {len(lista_respostas)} < {self.top_k}. Use factor_multiply_top_k if it is not desired.")
+
+        return lista_respostas[:self.top_k]
 
 

@@ -1,44 +1,21 @@
-1. tentar descobrir parâmetros de avaliação no squad1.1 do distilbert
 
+A fazer:
+1. salvar parâmetros e resultados (para facilitar futuras avaliações)
+OK Criar arquivos
+OK Atualizar manualmente execuções anteriores
+   Mudar rotina de cálculo para salvar nos arquivos
+
+2. acelerar execução: usar dataset
+    msg: 1015: UserWarning: You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
+
+3. tentar descobrir parâmetros de avaliação no squad1.1 do distilbert
     Abri pedido no site hf: https://huggingface.co/distilbert-base-cased-distilled-squad/discussions/2
 
-2. salvar parâmetros e resultados (para facilitar futuras avaliações)
+RODAR PARA CONTEXT LEARNING
 
-    evaluation
-
-        # identificação
-            cod
-            ind_program
-
-        # contexto
-            ind_kind_learning (CONTEXT x TRANSFER)
-            ind_language  (EN x PT)
-            name_model
-
-        # parâmetros (pode crescer)
-            # Transfer Learning
-                num_doc_stride
-                if_handle_impossible_answer
-                num_max_answer_length
-
-            # Context learning
-                ind_kind_prompt (ex.: 1 contexto, n qas)
-                descr_filter (ex.: len(contexto) + len(pergunta) < 1024 )
-                num_shot (para derivar se zero_shot e k de few_shot)
-
-        # números gerais
-            num_question
-            time_execution_total_s
-            time_execution_per_question_ms
-
-    metric_result
-        cod_evaluation
-        name_metric (F1, EM, F1@3, EM@3)
-        value
+Feito:
+    Salvar dataset corrigido após ajuste
+    Enviar mensagem sobre desempenho diferente (provável erro no uso dos dados)
+    Cálculo métrica F1@3 e EM@3
 
 
-3. Métrica f1@N e em@N
-
-4. Salvar dataset corrigido após ajuste
-
-5. Enviar mensagem sobre desempenho diferente (provável erro no uso dos dados)

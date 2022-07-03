@@ -12,14 +12,11 @@ from time import strftime
 # para execução direta
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
-from source.calculation.transfer_learning import responder_extracao  # pylint: disable=wrong-import-position # precisa dos sys.path antes
-from source.calculation.transfer_learning.modelo_reader import reader_pt   # pylint: disable=wrong-import-position # precisa dos sys.path antes
-
-from source.calculation.transfer_learning import util_modelo
-
+from source.calculation import util_modelo
+from source.calculation.transfer_learning.trata_reader import Reader
 
 json_resposta_esperada_topk_1 = {'texto_resposta': 'Flamengo,',
-'score': 0.834255,
+'score': 0.834189,
 'lista_referencia': [[22, 31]]}
 
 """
@@ -30,36 +27,27 @@ json_resposta_esperada_topk_2 = [{'texto_resposta': 'Flamengo,',
 
 json_resposta_esperada_topk_2 = [
  {'texto_resposta': 'Flamengo,',
- 'score': 0.834255, 'lista_referencia': [[22, 31]]},
+ 'score': 0.834189, 'lista_referencia': [[22, 31]]},
  {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
- 'score': 0.064724, 'lista_referencia': [[22, 131]]}]
+ 'score': 0.064743, 'lista_referencia': [[22, 131]]}]
 
 json_resposta_esperada_topk_9 = [
 {'texto_resposta': 'Flamengo,',
- 'score': 0.846104,
+ 'score': 0.846046,
  'lista_referencia': [[22, 31], [122, 131]]},
 {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo Flamengo,',
- 'score': 0.06713,
+ 'score': 0.067151,
  'lista_referencia': [[22, 131]]},
 {'texto_resposta': 'o Flamengo,',
- 'score': 0.005499,
+ 'score': 0.005507,
  'lista_referencia': [[20, 31]]},
 {'texto_resposta': 'Flamengo, melhor time do Brasil,',
- 'score': 0.001926,
+ 'score': 0.001927,
  'lista_referencia': [[22, 54]]},
 {'texto_resposta': 'Flamengo, melhor time do Brasil, ficou sem jogar a final da Libertadores.',
  'score': 0.001134,
  'lista_referencia': [[22, 95]]}]
 
-json_extracao_resposta =  {
-   "texto_pergunta": "Qual o melhor time do Brasil?",
-   "top_k":3,
-   "texto_contexto": "Por causa da chuva, o Flamengo, melhor \
-time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo \
-Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinha a honra \
-de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
- descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
-    }
 
 def are_two_lists_equals(list1: list, list2: list) -> bool:
     """
@@ -73,14 +61,28 @@ def are_two_lists_equals(list1: list, list2: list) -> bool:
     text_dif = f'There are {len(diff)} differences:\n{diff[:5]}'
     return result_bool, text_dif
 
-def teste_responder(parm_teste_objeto, reader):
+texto_pergunta= "Qual o melhor time do Brasil?"
+texto_contexto= "Por causa da chuva, o Flamengo, melhor \
+time do Brasil, ficou sem jogar a final da Libertadores. Há muitos torcedores pelo \
+Flamengo, o melhor time, na minha Família. Além da bicicleta, em 1990, eu tinha a honra \
+de ser flamenguista.  Ontem, quando reli os documentos do tribunal, \n\
+ descobri que em 1990 quando tomei posse, minha declaração de bens só continha uma bicicleta."
+
+def teste_responder(parm_teste_objeto):
     """
     teste de resposta por extração
     """
+    caminho_modelo = "models/transfer_learning/pierreguillou/bert-large-cased-squad-v1.1-portuguese"
 
-    json_extracao_resposta["top_k"] = 1
     caso_teste = 'teste trazer 1 resposta'
-    resposta =  responder_extracao.responder(reader, json_extracao_resposta)
+
+    dict_config_model = {"doc_stride":30,\
+                "top_k":1, \
+                "max_answer_length":40, \
+                "handle_impossible_answer":False, \
+                "factor_multiply_top_k":1}
+    model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
+    resposta = model.answer(texto_pergunta, texto_contexto)
     # print(resposta)
     caso_teste = 'teste responder multiplos documentos - trazer todos top_k=3'
     if len(resposta) != 1:
@@ -100,8 +102,14 @@ def teste_responder(parm_teste_objeto, reader):
 
 
     caso_teste = 'teste responder multiplos respostas concatenadas na referência- quantidade 2'
-    json_extracao_resposta["top_k"] = 2
-    resposta =  responder_extracao.responder(reader, json_extracao_resposta)
+
+    dict_config_model = {"doc_stride":30,\
+                "top_k":2, \
+                "max_answer_length":40, \
+                "handle_impossible_answer":False, \
+                "factor_multiply_top_k":1}
+    model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
+    resposta = model.answer(texto_pergunta, texto_contexto)
     # print(resposta)
 
     # msg_dif = util_modelo.compare_dicionarios(json_resposta_esperada_topk_2, resposta[0],"Esperado", "Encontrado")
@@ -111,9 +119,15 @@ def teste_responder(parm_teste_objeto, reader):
             'Resposta (conteúdo) difere do esperado: '+ msg_dif])
 
     caso_teste = 'teste responder multiplos documentos - quantidade 9'
-    json_extracao_resposta["top_k"] = 9
-    resposta =  responder_extracao.responder(reader, json_extracao_resposta)
-    # print(resposta)
+
+    dict_config_model = {"doc_stride":30,\
+                "top_k":9, \
+                "max_answer_length":40, \
+                "handle_impossible_answer":False, \
+                "factor_multiply_top_k":1}
+    model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
+    resposta = model.answer(texto_pergunta, texto_contexto)
+    print(resposta)
     se_iguais, msg_dif = are_two_lists_equals(json_resposta_esperada_topk_9, resposta,)
     if not se_iguais:
         parm_teste_objeto.lista_verification_errors.append([caso_teste,
@@ -129,14 +143,17 @@ def teste_limite_topk_reader(parm_teste_objeto, reader):
                 deepset/xlm-roberta-base-squad2-distilled
     """
 
-
-
-
+    caminho_modelo = "models/transfer_learning/pierreguillou/bert-large-cased-squad-v1.1-portuguese"
     for limite in range(1, 1000, 5):
         # caso_teste = f'{limite} teste responder multiplos documentos - quantidade enorme'
-        json_extracao_resposta["top_k"] = limite
-        resposta =  responder_extracao.responder(reader, json_extracao_resposta)
+        dict_config_model = {"doc_stride":30,\
+                    "top_k":limite, \
+                    "max_answer_length":40, \
+                    "handle_impossible_answer":False, \
+                    "factor_multiply_top_k":1}
+        model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
         print(f"limite {limite} len(resposta) {len(resposta)}")
+        _ = model.answer(texto_pergunta, texto_contexto)
 
 
 class TestEndPoint(unittest.TestCase):
@@ -149,6 +166,7 @@ class TestEndPoint(unittest.TestCase):
         warnings.filterwarnings("ignore", category=ResourceWarning)
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         self.lista_verification_errors = []
+        util_modelo.inicializa_seed(123)
         print(
             f"\n********* Testes iniciados de responder-extracao em {strftime('[%Y-%b-%d %H:%M:%S]')} ")
 
@@ -163,9 +181,10 @@ class TestEndPoint(unittest.TestCase):
         """
         casos de testes a realizar
         """
-        teste_realizado=False
+
+        # teste_realizado=False
         # teste_limite_topk_reader(self, reader_pt )
-        teste_responder(self, reader_pt)
+        teste_responder(self)
 
 
 

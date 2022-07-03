@@ -11,6 +11,11 @@ class SquadDataset(object): # pylint: disable=missing-class-docstring # código 
     def data(self):
         return self._data
 
+
+    @property
+    def name(self):
+        return 'squad-dev-v1.1-'+self._language
+
     @property
     def file_name(self):
         return self._file_name

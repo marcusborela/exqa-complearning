@@ -83,6 +83,41 @@ def metric_score_over_ground_truths(metric_fn, prediction, ground_truths):
 def exact_match_score(prediction, ground_truth):
     return int(normalize_answer(prediction) == normalize_answer(ground_truth))
 
+
+def calculate_metrics(parm_list_answer, parm_list_ground_truths):
+    """
+    Return dict with metrics got considering
+     parm_list_answer and parm_list_ground_truths
+    """
+    assert len(parm_list_answer)>=3, f"To get EM@3 and F1@3 it must have at least 3 answers. It has {len(parm_list_answer)} answers"
+    predict_answer = parm_list_answer[0]['texto_resposta']
+    em = metric_max_over_ground_truths(
+        exact_match_score, predict_answer, parm_list_ground_truths)
+    f1 = metric_max_over_ground_truths(
+        f1_score, predict_answer, parm_list_ground_truths)
+
+    # print(f"parm_list_ground_truths:\n {parm_list_ground_truths}")
+    # print(f"parm_list_answer:\n {parm_list_answer[:3]}")
+    # calculando @3 (para 3 primeiras respostas diferentes)
+    em_at_3 = em
+    f1_at_3 = f1
+    # print(f"ndx=0 em_at_3:{em_at_3} f1_at_3:{f1_at_3}")
+    for ndx_resposta in (1,2):
+        predict_answer = parm_list_answer[ndx_resposta]['texto_resposta']
+        em_ndx = metric_max_over_ground_truths(
+            exact_match_score, predict_answer, parm_list_ground_truths)
+        f1_ndx = metric_max_over_ground_truths(
+            f1_score, predict_answer, parm_list_ground_truths)
+        if em_ndx > em_at_3:
+            em_at_3 = em_ndx
+        if f1_ndx > f1_at_3:
+            f1_at_3 = f1_ndx
+        # print(f"ndx={ndx_resposta} em_at_3:{em_at_3} f1_at_3:{f1_at_3}")
+
+    return {'EM':em, 'F1':f1, 'EM@3':em_at_3, 'F1@3':f1_at_3}
+
+
+
 """
 se envolver squad2.0
 def get_gold_answers(example):
