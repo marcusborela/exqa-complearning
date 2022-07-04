@@ -9,11 +9,11 @@ from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_tr
 squad_dataset_en = squad_related.carregar_squad_1_1(parm_language='en')
 squad_dataset_pt = squad_related.carregar_squad_1_1(parm_language='pt')
 
-dict_config_model = {"doc_stride":128,\
-               "top_k":3, \
-               "max_answer_length":30, \
-               "handle_impossible_answer":False, \
-               "factor_multiply_top_k":3}
+dict_config_model = {"num_doc_stride":128,\
+               "num_top_k":3, \
+               "num_max_answer_length":30, \
+               "if_handle_impossible_answer":False, \
+               "num_factor_multiply_top_k":3}
 
 dict_config_eval = {"num_question_max":30}
 

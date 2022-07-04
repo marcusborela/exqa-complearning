@@ -80,21 +80,18 @@ def formatar_retirar_duplicatas(lista_resposta:List[Dict])-> List[Dict]:
 
 
 class Reader(): # pylint: disable=missing-class-docstring
+    _dict_parameters_example = {"num_doc_stride":128,\
+               "num_top_k":3, \
+               "num_max_answer_length":30, \
+               "if_handle_impossible_answer":False, \
+               "num_factor_multiply_top_k":3}
+
     def __init__(self,
                  pretrained_model_name_or_path: str,
                  parm_dict_config:Dict):
-
-        self._dict_parameters_example = {"doc_stride":128,\
-                           "top_k":3,\
-                           "max_answer_length" : 30,\
-                           "handle_impossible_answer":False,
-                           # only impacts reference_list and score
-                           # used to avoid return less then top_k diferent answer
-                           "factor_multiply_top_k":1}
-
-        msg_dif = util_modelo.compare_dicionarios_chaves(self._dict_parameters_example, parm_dict_config,
+        msg_dif = util_modelo.compare_dicionarios_chaves(Reader._dict_parameters_example, parm_dict_config,
             'Esperado', 'Encontrado')
-        assert msg_dif == "", f"Estrutura esperada de parâmetros de variáveis não corresponde ao esperado {msg_dif}"
+        assert msg_dif == "", f"Estrutura esperada de parm_dict_config não corresponde ao esperado {msg_dif}"
 
         self.name_device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(self.name_device)
@@ -109,25 +106,21 @@ class Reader(): # pylint: disable=missing-class-docstring
         self.pipe = pipeline("question-answering", model=self.model,\
                              tokenizer=self.tokenizer,\
                              device=self.device, framework='pt')
-        self.top_k = parm_dict_config["top_k"]
-        self.doc_stride = parm_dict_config["doc_stride"]
-        self.handle_impossible_answer = parm_dict_config["handle_impossible_answer"]
-        self.max_answer_length = parm_dict_config["max_answer_length"]
-        self.factor_multiply_top_k = parm_dict_config["factor_multiply_top_k"]
-
-    @property
-    def dict_parameters_example(self):
-        return self._dict_parameters_example
+        self.num_top_k = parm_dict_config["num_top_k"]
+        self.num_doc_stride = parm_dict_config["num_doc_stride"]
+        self.if_handle_impossible_answer = parm_dict_config["if_handle_impossible_answer"]
+        self.num_max_answer_length = parm_dict_config["num_max_answer_length"]
+        self.num_factor_multiply_top_k = parm_dict_config["num_factor_multiply_top_k"]
 
     @property
     def info(self):
         return {"name":self.pretrained_model_name_or_path,\
                 "device": self.name_device,\
-                "top_k": self.top_k,\
-                "doc_stride": self.doc_stride,\
-                "factor_multiply_top_k": self.factor_multiply_top_k,\
-                "handle_impossible_answer":self.handle_impossible_answer,\
-                "max_answer_length":self.max_answer_length,\
+                "top_k": self.num_top_k,\
+                "doc_stride": self.num_doc_stride,\
+                "factor_multiply_top_k": self.num_factor_multiply_top_k,\
+                "handle_impossible_answer":self.if_handle_impossible_answer,\
+                "max_answer_length":self.num_max_answer_length,\
                 "max_seq_len": self.model.config.max_position_embeddings}
 
     @staticmethod

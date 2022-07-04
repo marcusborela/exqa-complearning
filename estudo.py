@@ -5,33 +5,34 @@ sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
 import copy
 
-from transformers.data.processors.squad import SquadV1Processor # SquadV2Processor
+from source.data_related import squad_related
+from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
 
-# this processor loads the SQuAD2.0 dev set examples
-processor = SquadV1Processor()
-examples = processor.get_dev_examples("data/dataset/squad/", filename="dev-v1.1.json")
-print(len(examples))
+squad_dataset_en = squad_related.carregar_squad_1_1(parm_language='en')
+squad_dataset_pt = squad_related.carregar_squad_1_1(parm_language='pt')
 
+dict_config_model = {"num_doc_stride":128,\
+               "num_top_k":3, \
+               "num_max_answer_length":30, \
+               "if_handle_impossible_answer":False, \
+               "num_factor_multiply_top_k":3}
 
-def display_example(qid):
-    from pprint import pprint
+dict_config_eval = {"num_question_max":30}
 
-    idx = qid_to_example_index[qid]
-    q = examples[idx].question_text
-    c = examples[idx].context_text
-    a = [answer['text'] for answer in examples[idx].answers]
+resultado_en = evaluate_transfer(parm_dataset=squad_dataset_en,
+                parm_dict_config_model=dict_config_model,
+                parm_dict_config_eval=dict_config_eval,
+                parm_interval_print= 15  )
 
-    print(f'Example {idx} of {len(examples)}\n---------------------')
-    print(f"Q: {q}\n")
-    print("Context:")
-    pprint(c)
-    print(f"\nTrue Answers:\n{a}")
+print(resultado_en)
 
+"""
 
-# generate some maps to help us identify examples of interest
-qid_to_example_index = {example.qas_id: i for i, example in enumerate(examples)}
-qid_to_has_answer = {example.qas_id: bool(example.answers) for example in examples}
-answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if has_answer]
-no_answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if not has_answer]
+from source.data_related import rastro_evaluation_qa
 
 
+rastro_eval_qa = rastro_evaluation_qa.RastroEvaluationQa()
+rastro_eval_qa.imprime()
+rastro_eval_qa.save()
+
+"""

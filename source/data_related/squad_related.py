@@ -1,6 +1,6 @@
 import json
 
-class SquadDataset(object): # pylint: disable=missing-class-docstring # código de origem externa
+class SquadDataset(object):
     def __init__(self, data, file_name:str, language):
         self._data = data
         self._file_name = file_name
