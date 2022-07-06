@@ -76,12 +76,12 @@ def teste_responder(parm_teste_objeto):
 
     caso_teste = 'teste trazer 1 resposta'
 
-    dict_config_model = {"doc_stride":30,\
-                "top_k":1, \
-                "max_answer_length":40, \
-                "handle_impossible_answer":False, \
-                "factor_multiply_top_k":1}
-    model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
+    dict_config_model = {"num_doc_stride":30,\
+                "num_top_k":1, \
+                "num_max_answer_length":40, \
+                "if_handle_impossible_answer":False, \
+                "num_factor_multiply_top_k":1}
+    model = Reader(caminho_modelo, dict_config_model)
     resposta = model.answer(texto_pergunta, texto_contexto)
     # print(resposta)
     caso_teste = 'teste responder multiplos documentos - trazer todos top_k=3'
@@ -103,11 +103,11 @@ def teste_responder(parm_teste_objeto):
 
     caso_teste = 'teste responder multiplos respostas concatenadas na referência- quantidade 2'
 
-    dict_config_model = {"doc_stride":30,\
-                "top_k":2, \
-                "max_answer_length":40, \
-                "handle_impossible_answer":False, \
-                "factor_multiply_top_k":1}
+    dict_config_model = {"num_doc_stride":30,\
+                "num_top_k":2, \
+                "num_max_answer_length":40, \
+                "if_handle_impossible_answer":False, \
+                "num_factor_multiply_top_k":1}
     model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
     resposta = model.answer(texto_pergunta, texto_contexto)
     # print(resposta)
@@ -120,11 +120,11 @@ def teste_responder(parm_teste_objeto):
 
     caso_teste = 'teste responder multiplos documentos - quantidade 9'
 
-    dict_config_model = {"doc_stride":30,\
-                "top_k":9, \
-                "max_answer_length":40, \
-                "handle_impossible_answer":False, \
-                "factor_multiply_top_k":1}
+    dict_config_model = {"num_doc_stride":30,\
+                "num_top_k":9, \
+                "num_max_answer_length":40, \
+                "if_handle_impossible_answer":False, \
+                "num_factor_multiply_top_k":1}
     model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
     resposta = model.answer(texto_pergunta, texto_contexto)
     print(resposta)
@@ -146,11 +146,11 @@ def teste_limite_topk_reader(parm_teste_objeto, reader):
     caminho_modelo = "models/transfer_learning/pierreguillou/bert-large-cased-squad-v1.1-portuguese"
     for limite in range(1, 1000, 5):
         # caso_teste = f'{limite} teste responder multiplos documentos - quantidade enorme'
-        dict_config_model = {"doc_stride":30,\
-                    "top_k":limite, \
-                    "max_answer_length":40, \
-                    "handle_impossible_answer":False, \
-                    "factor_multiply_top_k":1}
+        dict_config_model = {"num_doc_stride":30,\
+                    "num_top_k":limite, \
+                    "num_max_answer_length":40, \
+                    "if_handle_impossible_answer":False, \
+                    "num_factor_multiply_top_k":1}
         model = Reader(pretrained_model_name_or_path=caminho_modelo, parm_dict_config=dict_config_model)
         print(f"limite {limite} len(resposta) {len(resposta)}")
         _ = model.answer(texto_pergunta, texto_contexto)

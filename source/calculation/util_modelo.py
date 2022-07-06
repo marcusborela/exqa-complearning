@@ -59,7 +59,7 @@ def compare_dicionarios_chaves(dict_1, dict_2, dict_1_name, dict_2_name, path=""
     for k in dict_1.keys():
         path = old_path + f"[{k}]"
         if not k in dict_2:
-            key_err += f"Key {dict_2_name}{path} not in {dict_2_name}\n"
+            key_err += f"Key {dict_1_name}{path} not in {dict_2_name}\n"
         else:
             if isinstance(dict_1[k], dict) and isinstance(dict_2[k], dict):
                 err += compare_dicionarios_chaves(
@@ -68,7 +68,7 @@ def compare_dicionarios_chaves(dict_1, dict_2, dict_1_name, dict_2_name, path=""
     for k in dict_2.keys():
         path = old_path + f"[{k}]"
         if not k in dict_1:
-            key_err += f"Key {dict_1_name}{path} not in {dict_2_name}\n"
+            key_err += f"Key {dict_2_name}{path} not in {dict_1_name}\n"
     return key_err + err
 
 def inicializa_seed(num_semente:int=123):

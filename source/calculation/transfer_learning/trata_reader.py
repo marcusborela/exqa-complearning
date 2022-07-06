@@ -47,7 +47,7 @@ def formatar_retirar_duplicatas(lista_resposta:List[Dict])-> List[Dict]:
         [{'texto_resposta': 'xxxx'},
          'score': 9999,  # acumulado
          # marcadores de posição relativa dentro do documento
-         'lista_referencia':[['uuid 2', 56, 65], ...]
+         'lista_referencia':[[56, 65], ...]
 
     """
     # print(f"lista_resposta_ordenada: {lista_resposta_ordenada}")
@@ -139,14 +139,14 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         respostas = self.pipe(question=texto_pergunta,
             context=texto_contexto,
-            handle_impossible_answer=self.handle_impossible_answer,
+            handle_impossible_answer=self.if_handle_impossible_answer,
             # como há casos de repostas idênticas em posições diferentes,
             # precisamos pegar mais respostas para devolver top_k
-            top_k= self.top_k*self.factor_multiply_top_k,
+            top_k= self.num_top_k*self.num_factor_multiply_top_k,
             # precisa??? self.max_seq_len = self.model.config.max_position_embeddings
-            doc_stride = self.doc_stride,
+            doc_stride = self.num_doc_stride,
             max_question_len = len(texto_pergunta), # número de tokens.. #chars>#tokens
-            max_answer_len = self.max_answer_length
+            max_answer_len = self.num_max_answer_length
             )
 
         if not isinstance(respostas, list):
@@ -156,9 +156,9 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         lista_respostas = formatar_retirar_duplicatas(lista_respostas)
 
-        if len(lista_respostas) < self.top_k:
-            print(f"Warning: #answers=len(lista_respostas)<self.top_k {len(lista_respostas)} < {self.top_k}. Use factor_multiply_top_k if it is not desired.")
+        if len(lista_respostas) < self.num_top_k:
+            print(f"Warning: #answers=len(lista_respostas)<self.num_top_k {len(lista_respostas)} < {self.num_top_k}. Use num_factor_multiply_top_k if it is not desired.")
 
-        return lista_respostas[:self.top_k]
+        return lista_respostas[:self.num_top_k]
 
 
