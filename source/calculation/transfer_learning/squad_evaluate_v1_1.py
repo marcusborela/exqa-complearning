@@ -68,6 +68,11 @@ def evaluate_transfer(parm_dataset:SquadDataset, \
         'num_shot':99999  # usado valor numérico para não dar erro na carga depois
     }
 
+    if parm_dict_config_eval and isinstance(parm_dict_config_eval, dict) and 'num_question_max' in parm_dict_config_eval:
+        num_question_max = parm_dict_config_eval['num_question_max']
+    else:
+        num_question_max = 999999999
+
     num_question = 0
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
     print(f"Evalating in dataset {parm_dataset.name} model \n{model.info} ")
@@ -94,11 +99,11 @@ def evaluate_transfer(parm_dataset:SquadDataset, \
                     F1:{round(100.0 * f1 / num_question,2)} \
                     EM@3:{round(100.0 * exact_match_at_3 / num_question,2)} \
                     F1@3:{round(100.0 * f1_at_3 / num_question,2)}")
-                if num_question >= parm_dict_config_eval['num_question_max']:
+                if num_question >= num_question_max:
                     break
-            if num_question >= parm_dict_config_eval['num_question_max']:
+            if num_question >= num_question_max:
                 break
-        if num_question >= parm_dict_config_eval['num_question_max']:
+        if num_question >= num_question_max:
             break
 
 

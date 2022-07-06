@@ -8,6 +8,18 @@ import time
 from source.data_related import squad_related, rastro_evaluation_qa
 from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
 
+from datasets import load_dataset
+
+nome_dataset = 'dev-v1.1.json'
+path_dataset = '/home/borela/fontes/exqa-complearning/'+nome_dataset
+
+dataset = load_dataset('json', data_files=path_dataset)
+
+
+
+
+
+exit()
 
 squad_dataset_en = squad_related.carregar_squad_1_1(parm_language='en')
 squad_dataset_pt = squad_related.carregar_squad_1_1(parm_language='pt')

@@ -13,11 +13,25 @@ dict_config_model = {"num_doc_stride":128,\
                "num_top_k":3, \
                "num_max_answer_length":30, \
                "if_handle_impossible_answer":False, \
-               "num_factor_multiply_top_k":3}
+               "num_factor_multiply_top_k":10}
 
-dict_config_eval = {"num_question_max":30}
+dict_config_eval = {} # {"num_question_max":30}
 
-resultado_en = evaluate_transfer(parm_dataset=squad_dataset_en,
+resultado = evaluate_transfer(parm_dataset=squad_dataset_pt,
                 parm_dict_config_model=dict_config_model,
                 parm_dict_config_eval=dict_config_eval,
-                parm_interval_print= 15  )
+                parm_interval_print= 1000  )
+
+dict_config_model = {"num_doc_stride":30,\
+               "num_top_k":3, \
+               "num_max_answer_length":40, \
+               "if_handle_impossible_answer":False, \
+               "num_factor_multiply_top_k":10}
+
+resultado = evaluate_transfer(parm_dataset=squad_dataset_pt,
+                parm_dict_config_model=dict_config_model,
+                parm_dict_config_eval=dict_config_eval,
+                parm_interval_print= 1000  )
+
+
+
