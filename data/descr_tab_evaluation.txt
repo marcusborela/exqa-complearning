@@ -2,28 +2,34 @@ Descr:"Evaluations performed on learning methods"
 # identification
 cod:int='Evaluation code, unique id'
 
-# context
+# target
+## learning method
 name_learning_method:str="Name of the learning method. Must be in ('context','transfer')"
+## dataset squad 1.1 language
 ind_language:str="Indicate the language. Must be one of: ('en', 'pt')"
+## model
 name_model:str="Name of the machine learning model"
 name_device:str="Name of device used. Rule: in ('cpu', 'cuda:0')"
-descr_filter:str="Description of the filter, if applied,  in the dataset for qa selection. Ex.: 'len(contexto) + len(pergunta) < 1024'"
 
-# números gerais
-num_question:int="Number of questions evaluated"
+# parameters
+## data
+descr_filter:str="Description of the filter, if applied,  in the dataset for qa selection. Ex.: 'len(contexto) + len(pergunta) < 1024'"
+## task
 num_top_k:int="Number of different answers considerated"
 num_factor_multiply_top_k:int="Number of answers considerated to treat repeated answers"
+num_max_answer_length:int="Maximum number of characters accepted in the response"
+## Transfer Learning
+num_doc_stride:int="Indicates the number of chars to be repeated in the division of large contexts, if necessary"
+if_handle_impossible_answer:bool::format 9="Indicates whether the model was considering the possibility of not having an answer to the question in the context"
+## Context learning
+ind_format_prompt:str="Indicates the format of the prompt in context learning. Must be in: (descr: "description; zero shot", descr_n: "description; shot: 1 context:n qas",descr_1:"description; shot: 1 context:1 qas")
+descr_task_prompt:str="Description of the task in the prompt"
+num_shot:int="Number of examples used in the prompt"
+
+
+# context information
+num_question:int="Number of questions evaluated"
 datetime_execution:datetime::format yyyy-yy-dd hh24:mi:ss="Date and time of execution start"
 time_execution_total:int::format 99999="Total execution time of the evaluation (in seconds)"
 time_execution_per_question:int::format 9999="Average evaluation execution time per question (in miliseconds)"
 
-# parâmetros (pode crescer)
-# Transfer Learning
-num_doc_stride:int="Indicates the number of chars to be repeated in the division of large contexts, if necessary"
-num_max_answer_length:int="Maximum number of characters accepted in the response"
-if_handle_impossible_answer:bool::format 9="Indicates whether the model was considering the possibility of not having an answer to the question in the context"
-
-# Context learning
-ind_format_prompt:str="Indicates the format of the prompt in context learning. Must be in: (descr: "description; zero shot", descr_n: "description; shot: 1 context:n qas",descr_1:"description; shot: 1 context:1 qas")
-descr_task_prompt:str="Description of the task in the prompt"
-num_shot:int="Number of examples used in the prompt"
