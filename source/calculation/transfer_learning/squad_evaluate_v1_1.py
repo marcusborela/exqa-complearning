@@ -77,7 +77,7 @@ def evaluate_transfer(parm_dataset:SquadDataset, \
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
     print(f"Evalating in dataset {parm_dataset.name} model \n{model.info} ")
     tstart = time.time()
-    for article in parm_dataset.data:
+    for article in parm_dataset.nested_json:
         for paragraph in article['paragraphs']:
             for qa in paragraph['qas']:
                 num_question += 1

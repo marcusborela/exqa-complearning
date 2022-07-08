@@ -1,16 +1,23 @@
 import json
+from datasets import load_dataset
+
+PATH_DATASET = '/home/borela/fontes/exqa-complearning/data/dataset/squad/'
 
 class SquadDataset(object):
-    def __init__(self, data, file_name:str, language):
-        self._data = data
+    def __init__(self, nested_json, dataset, file_name:str, language):
+        self._nested_json = nested_json
+        self._dataset = dataset
         self._file_name = file_name
         self._language = language
         self._num_questions = 10570
 
     @property
-    def data(self):
-        return self._data
+    def nested_json(self):
+        return self._nested_json
 
+    @property
+    def dataset(self):
+        return self._dataset
 
     @property
     def name(self):
@@ -37,7 +44,7 @@ def avaliar_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imp
     perguntas_repetidas = set()
     qtd_respostas_para_id_pergunta = {} # deixar os pares repetidos com maior número de respostas
     perguntas_unicas_id = set()
-    for artigo in parm_dataset.data:
+    for artigo in parm_dataset.nested_json:
         qtd_artigo += 1
         for paragrafo in artigo['paragraphs']:
             contexto = paragrafo['context']
@@ -76,7 +83,7 @@ def _excluir_duplicata_dataset_squad_1_1(parm_dataset:SquadDataset):
     perguntas_repetidas = set()
     qtd_respostas_para_id_pergunta = {} # deixar os pares repetidos com maior número de respostas
     perguntas_unicas_id = set()
-    for artigo in parm_dataset.data:
+    for artigo in parm_dataset.nested_json:
         qtd_artigo += 1
         for paragrafo in artigo['paragraphs']:
             contexto = paragrafo['context']
@@ -118,8 +125,8 @@ def _excluir_duplicata_dataset_squad_1_1(parm_dataset:SquadDataset):
     print(f"Erro respostas fora do texto: {qtd_erro_fora_texto} fora da posição {qtd_erro_fora_posicao}")
 
 def imprimir_exemplo_dataset_squad_1_1(parm_dataset:SquadDataset):
-    print(f"Dataset {parm_dataset.file_name} \n#artigos: {len(parm_dataset.data)}")
-    for artigo in parm_dataset.data:
+    print(f"Dataset {parm_dataset.file_name} \n#artigos: {len(parm_dataset.nested_json)}")
+    for artigo in parm_dataset.nested_json:
         print(f"\n****** artigo ****** \n  {artigo.keys()} \n  1o artigo \n    #paragrafos {len(artigo['paragraphs'])};\n    Artigo:\n      {artigo['title']}, ")
         for paragrafo in artigo['paragraphs']:
             print(f"\n    ****** paragrafo ******\n      {paragrafo.keys()} \n      1o paragrafo: \n      #perguntas: {len(paragrafo['qas'])} \n      Parágrafo: \n        {paragrafo['context']}")
@@ -136,29 +143,79 @@ def imprimir_exemplo_dataset_squad_1_1(parm_dataset:SquadDataset):
 
 def carregar_squad_1_1(parm_language:str):
     # path_project = '~/fontes/exqa-complearning/'
-    path_project = '/home/borela/fontes/exqa-complearning/'
     assert parm_language in ['en', 'pt'], "parm_language must be in ['en', 'pt']"
     if parm_language == 'en':
         nome_dataset = 'dev-v1.1.json'
-        path_dataset_file = path_project+"data/dataset/squad/"+nome_dataset
+        path_nested_json_file = PATH_DATASET+nome_dataset
+        path_flatten_json_file =  PATH_DATASET+'flatten-'+nome_dataset
     else:
         nome_dataset = 'dev-v1.1-pt.json'
-        path_dataset_file = path_project+"data/dataset/squad/"+nome_dataset
-    with open(path_dataset_file) as dataset_file:
-        dataset_json = json.load(dataset_file)
-        dataset = dataset_json['data']
-    return SquadDataset(data=dataset, file_name=nome_dataset, language = parm_language)
+        path_nested_json_file = PATH_DATASET+nome_dataset
+        path_flatten_json_file =  PATH_DATASET+'flatten-'+nome_dataset
 
-def corrige_e_salva_dataset_sem_duplicacao(parm_dataset:SquadDataset, parm_file_name):
+    with open(path_nested_json_file) as dataset_file:
+        nested_json = json.load(dataset_file)
+
+
+    datasets = load_dataset('json',
+                        data_files={'test': path_flatten_json_file, \
+                                    },
+                        field='data')
+    return SquadDataset(nested_json= nested_json['data'], dataset= datasets['test'], file_name=nome_dataset, language = parm_language)
+
+# Code below used just one time for correction/convertion
+def _convert_json_in_dataset(parm_dataset:SquadDataset):
+
+    # Iterating through the json list
+    entry_list = list()
+
+    for row in parm_dataset.nested_json:
+        title = row['title']
+
+        for paragraph in row['paragraphs']:
+            context = paragraph['context']
+
+            for qa in paragraph['qas']:
+                entry = {}
+
+                qa_id = qa['id']
+                question = qa['question']
+                answers = qa['answers']
+
+                entry['id'] = qa_id
+                entry['title'] = title.strip()
+                entry['context'] = context.strip()
+                entry['question'] = question.strip()
+
+                answer_starts = [answer["answer_start"] for answer in answers]
+                answer_texts = [answer["text"].strip() for answer in answers]
+
+                entry['answer_start'] = answer_starts
+                entry['answer_text'] = answer_texts
+
+                entry_list.append(entry)
+
+    new_dict = {}
+    new_dict['data'] = entry_list
+    file_name = 'flatten-' + str(parm_dataset.file_name)
+    with open(PATH_DATASET+file_name, 'w') as json_file:
+        json.dump(new_dict, json_file)
+
+def _gera_dataset_from_json():
+    # squad_dataset_en = carregar_squad_1_1(parm_language='en')
+    squad_dataset_pt = carregar_squad_1_1(parm_language='pt')
+    _convert_json_in_dataset(squad_dataset_pt)
+
+
+def _corrige_e_salva_dataset_sem_duplicacao(parm_dataset:SquadDataset, parm_file_name):
     """
     Salva arquivo sem duplicatas em path_project/data/dataset/squad/
     """
     _excluir_duplicata_dataset_squad_1_1(parm_dataset)
     # path_project = '~/fontes/exqa-complearning/'
-    path_project = '/home/borela/fontes/exqa-complearning/'
-    path_dataset_file = path_project+"data/dataset/squad/"+parm_file_name
+    path_dataset_file = PATH_DATASET+parm_file_name
     dict_json = {"version": "1.1"}
-    dict_json['data']=parm_dataset.data
+    dict_json['data']=parm_dataset.nested_json
     with open(path_dataset_file,'w', encoding='utf-8') as dataset_file:
         json.dump(dict_json, dataset_file)
 
