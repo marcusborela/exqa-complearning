@@ -1,5 +1,6 @@
 import json
 from datasets import load_dataset
+import pandas as pd
 
 PATH_DATASET = '/home/borela/fontes/exqa-complearning/data/dataset/squad/'
 
@@ -10,6 +11,9 @@ class SquadDataset(object):
         self._file_name = file_name
         self._language = language
         self._num_questions = 10570
+        path_flatten_json_file =  PATH_DATASET+'flatten-'+self._file_name
+        df_dataset = pd.read_json(path_flatten_json_file)
+        self._df = pd.json_normalize(df_dataset['data'])
 
     @property
     def nested_json(self):
@@ -34,6 +38,10 @@ class SquadDataset(object):
     @property
     def num_questions(self):
         return self._num_questions
+
+    @property
+    def df(self):
+        return self._df
 
 def avaliar_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imprimir=None):
     # parm_lista_pergunta_imprimir: exemplo repetidas ['571a52cb4faf5e1900b8a96b', '5730b9dc8ab72b1400f9c70f', '571a50df4faf5e1900b8a960']
