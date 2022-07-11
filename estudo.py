@@ -1,28 +1,40 @@
 print('oi')
+import copy
+import time
 import os, sys
 print(sys.path)
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
-import copy
-import time
-from source.data_related import squad_related, rastro_evaluation_qa
-from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
+# from source.data_related import squad_related, rastro_evaluation_qa
+# from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
 
 from datasets import load_dataset
+from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
+from source.data_related import squad_related
 
-nome_dataset = 'dev-v1.1.json'
-path_dataset = '/home/borela/fontes/exqa-complearning/'+nome_dataset
+squad_dataset_en =squad_related.load_squad_dataset_1_1('en')
 
-dataset = load_dataset('json', data_files=path_dataset)
+dict_config_model = {"num_doc_stride":128,\
+               "num_top_k":3, \
+               "num_max_answer_length":30, \
+               "if_handle_impossible_answer":False, \
+               "num_factor_multiply_top_k":10}
 
+dict_config_eval = {"num_question_max":30}
+
+resultado = evaluate_transfer(parm_dataset=squad_dataset_en,
+                parm_dict_config_model=dict_config_model,
+                parm_dict_config_eval=dict_config_eval,
+                parm_if_record=False,
+                parm_interval_print= 1000)
 
 
 
 
 exit()
 
-squad_dataset_en = squad_related.carregar_squad_1_1(parm_language='en')
-squad_dataset_pt = squad_related.carregar_squad_1_1(parm_language='pt')
+squad_dataset_en = squad_related.load_squad_dataset_1_1(parm_language='en')
+squad_dataset_pt = squad_related.load_squad_dataset_1_1(parm_language='pt')
 
 dict_config_model = {"num_doc_stride":40,\
                "num_top_k":3, \

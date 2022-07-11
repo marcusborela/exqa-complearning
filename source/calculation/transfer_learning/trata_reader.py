@@ -89,6 +89,8 @@ class Reader(): # pylint: disable=missing-class-docstring
     def __init__(self,
                  pretrained_model_name_or_path: str,
                  parm_dict_config:Dict):
+        if parm_dict_config is None:
+            parm_dict_config = deepcopy(Reader._dict_parameters_example)
         msg_dif = util_modelo.compare_dicionarios_chaves(Reader._dict_parameters_example, parm_dict_config,
             'Esperado', 'Encontrado')
         assert msg_dif == "", f"Estrutura esperada de parm_dict_config não corresponde ao esperado {msg_dif}"
@@ -133,7 +135,6 @@ class Reader(): # pylint: disable=missing-class-docstring
     def get_tokenizer(pretrained_model_name_or_path: str,
                       *args, batch_size: int = 16, **kwargs) -> AutoTokenizer:
         return AutoTokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
-
 
     def answer(self, texto_pergunta: str, texto_contexto: str) -> List[Dict]:
 

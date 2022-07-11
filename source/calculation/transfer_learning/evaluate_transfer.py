@@ -1,3 +1,7 @@
+"""
+Boas referências: https://github.com/nlp-with-transformers/notebooks
+"""
+
 import os
 import sys
 sys.path.append(os.path.abspath('.'))
@@ -6,8 +10,8 @@ sys.path.append(os.path.abspath(r'./.'))
 from source.data_related import squad_related
 from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
 
-squad_dataset_en = squad_related.carregar_squad_1_1(parm_language='en')
-squad_dataset_pt = squad_related.carregar_squad_1_1(parm_language='pt')
+squad_dataset_en = squad_related.load_squad_dataset_1_1(parm_language='en')
+squad_dataset_pt = squad_related.load_squad_dataset_1_1(parm_language='pt')
 
 dict_config_model = {"num_doc_stride":128,\
                "num_top_k":3, \

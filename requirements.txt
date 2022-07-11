@@ -14,3 +14,4 @@ sentence_transformers==2.0.0
 # torch==1.10.2+cu113 pip à parte no dockerfile
 jsonschema==3.1.1
 datasets==2.3.2
+matplotlib==3.5.2
