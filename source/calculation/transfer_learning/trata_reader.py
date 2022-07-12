@@ -84,7 +84,7 @@ class Reader(): # pylint: disable=missing-class-docstring
     _dict_parameters_example = {"num_doc_stride":128,\
                "num_top_k":3, \
                "num_max_answer_length":30, \
-               "batch_size":20, \
+               "num_batch_size":20, \
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":3}
 
@@ -107,15 +107,17 @@ class Reader(): # pylint: disable=missing-class-docstring
         self.tokenizer = self.get_tokenizer(pretrained_model_name_or_path)
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         # não usado # Automatic Mixed Precision self.use_amp = use_amp
-        self.batch_size = parm_dict_config["batch_size"]
+        self.num_batch_size = parm_dict_config["num_batch_size"]
         self.num_top_k = parm_dict_config["num_top_k"]
         self.num_doc_stride = parm_dict_config["num_doc_stride"]
         self.if_handle_impossible_answer = parm_dict_config["if_handle_impossible_answer"]
         self.num_max_answer_length = parm_dict_config["num_max_answer_length"]
         self.num_factor_multiply_top_k = parm_dict_config["num_factor_multiply_top_k"]
+        self.max_seq_len = self.model.config.max_position_embeddings
+
         self.pipe = pipeline("question-answering", model=self.model,\
                              tokenizer=self.tokenizer,\
-                             batch_size=self.batch_size,\
+                             batch_size=self.num_batch_size,\
                              device=self.device, framework='pt')
 
     @property
@@ -123,12 +125,12 @@ class Reader(): # pylint: disable=missing-class-docstring
         return {"name":self.pretrained_model_name_or_path,\
                 "device": self.name_device,\
                 "top_k": self.num_top_k,\
-                "batch_size": self.batch_size,\
+                "batch_size": self.num_batch_size,\
                 "doc_stride": self.num_doc_stride,\
                 "factor_multiply_top_k": self.num_factor_multiply_top_k,\
                 "handle_impossible_answer":self.if_handle_impossible_answer,\
                 "max_answer_length":self.num_max_answer_length,\
-                "max_seq_len": self.model.config.max_position_embeddings}
+                "max_seq_len": self.max_seq_len}
 
     @staticmethod
     def get_model(pretrained_model_name_or_path: str,
@@ -138,7 +140,7 @@ class Reader(): # pylint: disable=missing-class-docstring
 
     @staticmethod
     def get_tokenizer(pretrained_model_name_or_path: str,
-                      *args, batch_size: int = 16, **kwargs) -> AutoTokenizer:
+                      *args, batch_size: int = 128, **kwargs) -> AutoTokenizer:
         return AutoTokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
 
     def answer_one_question(self, texto_pergunta: str, texto_contexto: str) -> List[Dict]:
@@ -154,7 +156,8 @@ class Reader(): # pylint: disable=missing-class-docstring
             # precisa??? self.max_seq_len = self.model.config.max_position_embeddings
             doc_stride = self.num_doc_stride,
             max_question_len = len(texto_pergunta), # número de tokens.. #chars>#tokens
-            max_answer_len = self.num_max_answer_length
+            max_answer_len = self.num_max_answer_length,
+            max_seq_len = self.max_seq_len
             )
 
         if not isinstance(respostas, list):
@@ -177,6 +180,8 @@ class Reader(): # pylint: disable=missing-class-docstring
                 list_column_drop.append(column_name)
 
         dts = parm_dataset.remove_columns(list_column_drop)
+        for column_name in ('context', 'question'):
+            assert column_name in dts.column_names, f"Dataset must have column {column_name}. It has {dts.column_names}"
 
         respostas = self.pipe(
             data=dts,
@@ -186,8 +191,9 @@ class Reader(): # pylint: disable=missing-class-docstring
             top_k= self.num_top_k*self.num_factor_multiply_top_k,
             # precisa??? self.max_seq_len = self.model.config.max_position_embeddings
             doc_stride = self.num_doc_stride,
-            max_question_len = 1000, # número de tokens.. #chars>#tokens
-            max_answer_len = self.num_max_answer_length
+            max_question_len = 50, # número de tokens.. pt: max 44, en: max 46
+            max_answer_len = self.num_max_answer_length,
+            max_seq_len = self.max_seq_len
             )
 
         if not isinstance(respostas, list):
@@ -195,9 +201,10 @@ class Reader(): # pylint: disable=missing-class-docstring
         else:
             lista_respostas = respostas
 
-        lista_respostas = formatar_retirar_duplicatas(lista_respostas)
+        lista_resposta_formatada = []
+        for ndx_qas, respostas_qas in enumerate(lista_respostas):
+            if len(respostas_qas) < self.num_top_k:
+                print(f"Warning: #answers=len(lista_respostas)<self.num_top_k ndx_qas: {ndx_qas} {len(respostas_qas)} < {self.num_top_k}. Use num_factor_multiply_top_k if it is not desired.")
+            lista_resposta_formatada.append(formatar_retirar_duplicatas(respostas_qas)[:self.num_top_k])
 
-        if len(lista_respostas) < self.num_top_k:
-            print(f"Warning: #answers=len(lista_respostas)<self.num_top_k {len(lista_respostas)} < {self.num_top_k}. Use num_factor_multiply_top_k if it is not desired.")
-
-        return lista_respostas[:self.num_top_k]
+        return lista_resposta_formatada

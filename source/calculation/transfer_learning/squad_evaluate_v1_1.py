@@ -1,7 +1,7 @@
 import time
 from typing import Dict
 
-from source.calculation.metric.qa_metric import calculate_metrics
+from source.calculation.metric.qa_metric import calculate_metrics, calculate_metrics_grouped
 from source.calculation.transfer_learning.trata_reader import Reader
 from source.data_related.squad_related import SquadDataset
 from source.data_related import rastro_evaluation_qa
@@ -9,6 +9,7 @@ from source.calculation import util_modelo
 
 example_dict_config_model = {"num_doc_stride":128,\
                "num_top_k":3, \
+               "num_batch_size":1, \
                "num_max_answer_length":30, \
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":3}
@@ -38,6 +39,7 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
     assert parm_dict_config_model['num_top_k']>=3, f"To get EM@3 and F1@3 it must ask for at least 3 answers. It has {parm_dict_config_model['num_top_k']} answers asked."
     assert isinstance(parm_dict_config_eval,dict), f"parm_dict_config_eval must be a dict"
 
+    util_modelo.inicializa_seed(123) # para tentar repetir cálculo
     if parm_dataset.language == 'en':
         name_model = 'distilbert-base-cased-distilled-squad'
         path_model = "models/transfer_learning/"+name_model
@@ -56,6 +58,7 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
         'descr_filter':str(parm_dict_config_eval),
         # números gerais
         'datetime_execution': time.strftime('%Y-%m-%d %H:%M:%S'),
+        'num_batch_size':1, # individual answer parm_dict_config_model['num_batch_size'],
         'num_top_k':parm_dict_config_model['num_top_k'],
         "num_factor_multiply_top_k":parm_dict_config_model['num_factor_multiply_top_k'],
         # parâmetros (pode crescer)
@@ -83,7 +86,7 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
             for qa in paragraph['qas']:
                 num_question += 1
                 # calcular resposta
-                resposta = model.answer(texto_contexto=paragraph['context'],\
+                resposta = model.answer_one_question(texto_contexto=paragraph['context'],\
                                         texto_pergunta=qa['question'])
                 # print(f"resposta {resposta}")
                 ground_truths = list(map(lambda x: x['text'], qa['answers']))
@@ -167,6 +170,8 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
     assert parm_dict_config_model['num_top_k']>=3, f"To get EM@3 and F1@3 it must ask for at least 3 answers. It has {parm_dict_config_model['num_top_k']} answers asked."
     assert isinstance(parm_dict_config_eval,dict), f"parm_dict_config_eval must be a dict"
 
+    util_modelo.inicializa_seed(123) # para tentar repetir cálculo
+
     if parm_dataset.language == 'en':
         name_model = 'distilbert-base-cased-distilled-squad'
         path_model = "models/transfer_learning/"+name_model
@@ -185,6 +190,7 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
         'descr_filter':str(parm_dict_config_eval),
         # números gerais
         'datetime_execution': time.strftime('%Y-%m-%d %H:%M:%S'),
+        'num_batch_size':parm_dict_config_model['num_batch_size'],
         'num_top_k':parm_dict_config_model['num_top_k'],
         "num_factor_multiply_top_k":parm_dict_config_model['num_factor_multiply_top_k'],
         # parâmetros (pode crescer)
@@ -197,43 +203,24 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
         'descr_task_prompt':'',
         'num_shot':99999  # usado valor numérico para não dar erro na carga depois
     }
-
+    target_dataset = parm_dataset.dataset
     if parm_dict_config_eval and isinstance(parm_dict_config_eval, dict) and 'num_question_max' in parm_dict_config_eval:
-        parm_dataset.dataset.select(range(parm_dict_config_eval['num_question_max']))
+        target_dataset = target_dataset.select(range(parm_dict_config_eval['num_question_max']))
 
     num_question = 0
-    f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
     print(f"Evalating in dataset {parm_dataset.name} model \n{model.info} ")
+
+    num_question = len(target_dataset)
     tstart = time.time()
-    for article in parm_dataset.nested_json:
-        for paragraph in article['paragraphs']:
-            for qa in paragraph['qas']:
-                num_question += 1
-                # calcular resposta
-                resposta = model.answer(texto_contexto=paragraph['context'],\
-                                        texto_pergunta=qa['question'])
-                # print(f"resposta {resposta}")
-                ground_truths = list(map(lambda x: x['text'], qa['answers']))
-                metric_calculated = calculate_metrics(resposta, ground_truths)
-                # print(f"metric_calculated {metric_calculated}")
-                exact_match += metric_calculated['EM']
-                f1 += metric_calculated['F1']
-                exact_match_at_3 += metric_calculated['EM@3']
-                f1_at_3 += metric_calculated['F1@3']
 
-                if num_question % parm_interval_print == 0:
-                    print(f"#{num_question} \
-                    EM:{round(100.0 * exact_match / num_question,2)} \
-                    F1:{round(100.0 * f1 / num_question,2)} \
-                    EM@3:{round(100.0 * exact_match_at_3 / num_question,2)} \
-                    F1@3:{round(100.0 * f1_at_3 / num_question,2)}")
+    # calcular resposta
+    lista_resposta = model.answer(parm_dataset=target_dataset)
+    # print(f"resposta {resposta}")
 
+
+    metric_calculated = calculate_metrics_grouped(lista_resposta, target_dataset, num_question)
 
     tend = time.time()
-    exact_match = round(100.0 * exact_match / num_question,2)
-    f1 = round(100.0 * f1 / num_question,2)
-    exact_match_at_3 = round(100.0 * exact_match_at_3 / num_question,2)
-    f1_at_3 = round(100.0 * f1_at_3 / num_question,2)
 
 
     dict_evaluation['num_question'] = num_question
@@ -241,17 +228,9 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
     dict_evaluation['time_execution_per_question'] = int(round(1000*(tend - tstart)/num_question, 0))
     evaluation = rastro_evaluation_qa.EvaluationQa(dict_evaluation)
 
-    calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':'EM', 'value':round(exact_match,2)})
-    evaluation.add_metric(calculate_metric)
-
-    calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':'F1', 'value':round(f1,2)})
-    evaluation.add_metric(calculate_metric)
-
-    calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':'EM@3', 'value':round(exact_match_at_3,2)})
-    evaluation.add_metric(calculate_metric)
-
-    calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':'F1@3', 'value':round(f1_at_3,2)})
-    evaluation.add_metric(calculate_metric)
+    for metric, metric_value in metric_calculated.items():
+        calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':metric, 'value':metric_value})
+        evaluation.add_metric(calculate_metric)
 
     print(f"Evaluation result: {evaluation.info}")
 

@@ -32,7 +32,7 @@ class CalculatedMetric(object):
         # assert isinstance(parm_calculated_metric['value'], float), f"parm_calculated_metric.value must be float"
 
         assert parm_calculated_metric['cod_metric'] in ('EM', 'F1', 'EM@3', 'F1@3'), "parm_calculated_metric.cod_metric must be in ('EM', 'F1', 'EM@3', 'F1@3'). Found: {parm_calculated_metric['cod_metric']}"
-        assert parm_calculated_metric['value'] >= 1, "parm_calculated_metric.value must be >= 1 (83.38%) . Found: {parm_calculated_metric['value']}"
+        # assert parm_calculated_metric['value'] >= 1, "parm_calculated_metric.value must be >= 1 (83.38%) . Found: {parm_calculated_metric['value']}"
 
 
         self._data = parm_calculated_metric
@@ -68,6 +68,7 @@ class EvaluationQa(object):
         'descr_filter':str,
         # números gerais
         'num_question':int,
+        'num_batch_size':int,
         'num_top_k':int,
         'num_factor_multiply_top_k':int,
         'datetime_execution': str,

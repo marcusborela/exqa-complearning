@@ -1,8 +1,13 @@
+"""
+  reference about dataset
+    https://huggingface.co/docs/datasets/v1.4.0/processing.html
+
+"""
 import json
 from datasets import load_dataset
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from source.calculation import util_modelo
 
 PATH_DATASET = '/home/borela/fontes/exqa-complearning/data/dataset/squad/'
 
@@ -86,18 +91,36 @@ class SquadDataset(object):
             inputs = parm_tokenizer(row["question"], row["context"])
             return len(inputs["input_ids"])
 
+        def compute_input_length_question(row):
+            inputs = parm_tokenizer(row["question"])
+            return len(inputs["input_ids"])
+
+
         df = pd.DataFrame()
-        df["n_tokens"] = self._df.apply(compute_input_length, axis=1)
+        df["n_tokens_question_context"] = self._df.apply(compute_input_length, axis=1)
+        df["n_tokens_question"] = self._df.apply(compute_input_length_question, axis=1)
+        print("Number of tokens:")
+        print(df.describe())
 
         fig, ax = plt.subplots()
-        df["n_tokens"].hist(bins=100, grid=False, ec="C0", ax=ax)
+        df["n_tokens_question_context"].hist(bins=100, grid=False, ec="C0", ax=ax)
+        max_val = df["n_tokens_question_context"].max()
         plt.xlabel("Number of tokens in question-context pair")
-        ax.axvline(x=512, ymin=0, ymax=1, linestyle="--", color="C1",
+        ax.axvline(x=max_val, ymin=0, ymax=1, linestyle="--", color="C1",
                 label="Maximum sequence length")
         plt.legend()
         plt.ylabel("Count")
         plt.show()
 
+        fig, ax = plt.subplots()
+        max_val = df["n_tokens_question"].max()
+        df["n_tokens_question"].hist(bins=100, grid=False, ec="C0", ax=ax)
+        plt.xlabel("Number of tokens in question")
+        ax.axvline(x=max_val, ymin=0, ymax=1, linestyle="--", color="C1",
+                label="Maximum sequence length")
+        plt.legend()
+        plt.ylabel("Count")
+        plt.show()
 
 def evaluate_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imprimir=None):
     # parm_lista_pergunta_imprimir: exemplo repetidas ['571a52cb4faf5e1900b8a96b', '5730b9dc8ab72b1400f9c70f', '571a50df4faf5e1900b8a960']
@@ -139,7 +162,6 @@ def evaluate_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_im
     print(f"Totais artigos:{qtd_artigo} paragrafos:{qtd_paragrafo} perguntas:{qtd_pergunta} respostas:{qtd_resposta}")
     print(f"Erros perguntas: repetidas {qtd_pergunta_repetida}")
     print(f"Erro respostas fora do texto: {qtd_erro_fora_texto} fora da posição {qtd_erro_fora_posicao}")
-
 
 def _del_duplicate_dataset_squad_1_1(parm_dataset:SquadDataset):
     print(f"Levantando quantitativo e verificando inconsistências no dataset {parm_dataset.file_name}")
@@ -187,7 +209,6 @@ def _del_duplicate_dataset_squad_1_1(parm_dataset:SquadDataset):
     print(f"Totais artigos:{qtd_artigo} paragrafos:{qtd_paragrafo} perguntas:{qtd_pergunta} respostas:{qtd_resposta}")
     print(f"Erros perguntas: repetidas {qtd_pergunta_repetida} excluídas {qtd_exclusao}")
     print(f"Erro respostas fora do texto: {qtd_erro_fora_texto} fora da posição {qtd_erro_fora_posicao}")
-
 
 def load_squad_dataset_1_1(parm_language:str):
     # path_project = '~/fontes/exqa-complearning/'
@@ -267,42 +288,3 @@ def _correct_and_save_dataset_without_duplication(parm_dataset:SquadDataset, par
     dict_json['data']=parm_dataset.nested_json
     with open(path_dataset_file,'w', encoding='utf-8') as dataset_file:
         json.dump(dict_json, dataset_file)
-
-"""
-May be used
-
-from transformers.data.processors.squad import SquadV1Processor # SquadV2Processor
-
-processor = SquadV1Processor()
-examples = processor.get_dev_examples(path_project+"data/dataset/squad/", filename="dev-v1.1.json")
-print(len(examples))
-
-
-from datasets import load_dataset
-dataset = load_dataset("squad_related")
-
-
-
-# generate some maps to help us identify examples of interest
-qid_to_example_index = {example.qas_id: i for i, example in enumerate(examples)}
-qid_to_has_answer = {example.qas_id: bool(example.answers) for example in examples}
-answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if has_answer]
-# no_answer_qids = [qas_id for qas_id, has_answer in qid_to_has_answer.items() if not has_answer]
-
-
-
-def display_example(qid):
-    from pprint import pprint
-
-    idx = qid_to_example_index[qid]
-    q = examples[idx].question_text
-    c = examples[idx].context_text
-    a = [answer['text'] for answer in examples[idx].answers]
-
-    print(f'Example {idx} of {len(examples)}\n---------------------')
-    print(f"Q: {q}\n")
-    print("Context:")
-    pprint(c)
-    print(f"\nTrue Answers:\n{a}")
-
-"""
