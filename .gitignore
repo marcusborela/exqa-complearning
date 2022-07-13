@@ -20,3 +20,4 @@ models/*/*/*.msgpack
 models/*/*/*.h5
 coverage_html_report/
 old_*
+.vs/*
