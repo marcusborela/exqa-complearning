@@ -205,3 +205,39 @@ def persist_evaluation(parm_list_evaluation:List[EvaluationQa], parm_if_print:bo
     rastro_eval_qa.save()
     if parm_if_print:
         rastro_eval_qa.imprime()
+    return rastro_eval_qa._last_code+1 # código gerado
+
+dtype_calculated_metric_per_question = {
+    'cod_evaluation':int,
+    'cod_question':str,
+    'cod_metric':str,
+    'value':float,
+}
+
+def persist_metric_per_question(parm_cod_evaluation, parm_dict_metric_per_question:Dict):
+    """
+    Expects a dict with:
+        id_question: {} {'EM':xxxx, 'F1':xxxx, 'EM@3':xxxx, 'F1@3':xxxx}
+    """
+    # Reads data from tab_calculated_metric_per_question.csv in dataframe
+    df_calculated_metric_per_question = pd.read_csv('data/tab_calculated_metric_per_question.csv', sep = ',',
+        header=0,
+        dtype= dtype_calculated_metric_per_question,
+        index_col=False)
+
+    if df_calculated_metric_per_question.shape[0]>0:
+        for property_name, property_type in dtype_calculated_metric_per_question.items():
+            if property_type in (int, float, bool):
+                df_calculated_metric_per_question[property_name] = df_calculated_metric_per_question[property_name].astype(property_type)
+
+    eval_dict = {}
+    eval_dict['cod_evaluation'] = parm_cod_evaluation
+    for question_id in parm_dict_metric_per_question:
+        eval_dict['cod_question'] = question_id
+        for metric, metric_value in parm_dict_metric_per_question[question_id].items():
+            eval_dict['cod_metric'] = metric
+            eval_dict['value'] = metric_value
+            #append row to the dataframe
+            df_calculated_metric_per_question = df_calculated_metric_per_question.append(eval_dict, ignore_index=True)
+
+    df_calculated_metric_per_question.to_csv('data/tab_calculated_metric_per_question.csv', sep = ',', index=False)

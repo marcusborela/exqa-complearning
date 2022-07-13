@@ -77,6 +77,7 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
     else:
         num_question_max = 999999999
 
+    metric_per_question = {}
     num_question = 0
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
     print(f"Evalating in dataset {parm_dataset.name} model \n{model.info} ")
@@ -96,6 +97,7 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
                 f1 += metric_calculated['F1']
                 exact_match_at_3 += metric_calculated['EM@3']
                 f1_at_3 += metric_calculated['F1@3']
+                metric_per_question[qa['id']] = metric_calculated
 
                 if num_question % parm_interval_print == 0:
                     print(f"#{num_question} \
@@ -139,7 +141,9 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
 
     if parm_if_record:
         # atualizar dataframes
-        rastro_evaluation_qa.persist_evaluation([evaluation])
+        cod_evaluation = rastro_evaluation_qa.persist_evaluation([evaluation])
+        rastro_evaluation_qa.persist_metric_per_question(parm_cod_evaluation=cod_evaluation,\
+                                            parm_dict_metric_per_question=metric_per_question)
 
 
     return evaluation.info
@@ -218,7 +222,7 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
     # print(f"resposta {resposta}")
 
 
-    metric_calculated = calculate_metrics_grouped(lista_resposta, target_dataset, num_question)
+    metric_calculated, metric_calculated_per_question = calculate_metrics_grouped(lista_resposta, target_dataset, num_question)
 
     tend = time.time()
 
@@ -236,7 +240,10 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
 
     if parm_if_record:
         # atualizar dataframes
-        rastro_evaluation_qa.persist_evaluation([evaluation])
+        cod_evaluation = rastro_evaluation_qa.persist_evaluation([evaluation])
+        rastro_evaluation_qa.persist_metric_per_question(parm_cod_evaluation=cod_evaluation,\
+                                            parm_dict_metric_per_question=metric_calculated_per_question)
+
 
 
 

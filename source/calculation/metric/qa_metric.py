@@ -118,11 +118,13 @@ def calculate_metrics(parm_list_answer, parm_list_ground_truths):
 
 
 def calculate_metrics_grouped(lista_resposta, target_dataset, num_question:int):
+    metric_per_question = {}
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
     for ndx in range(len(lista_resposta)):
         list_ground_truth = target_dataset[ndx]['answer_text']
         # ground_truths = list(map(lambda x: x['text'], list_ground_truth))
         metric_calculated = calculate_metrics(lista_resposta[ndx], list_ground_truth)
+        metric_per_question[target_dataset[ndx]['id']] =  metric_calculated
         # print(f"metric_calculated {metric_calculated}")
         exact_match += metric_calculated['EM']
         f1 += metric_calculated['F1']
@@ -134,7 +136,7 @@ def calculate_metrics_grouped(lista_resposta, target_dataset, num_question:int):
     exact_match_at_3 = round(100.0 * exact_match_at_3 / num_question,2)
     f1_at_3 = round(100.0 * f1_at_3 / num_question,2)
 
-    return {'F1':f1, 'EM':exact_match, 'EM@3':exact_match_at_3, 'F1@3':f1_at_3 }
+    return {'F1':f1, 'EM':exact_match, 'EM@3':exact_match_at_3, 'F1@3':f1_at_3 }, metric_per_question
 
 """
 se envolver squad2.0

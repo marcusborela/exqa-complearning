@@ -21,7 +21,7 @@ dict_config_model = {"num_doc_stride":128,\
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":10}
 
-dict_config_eval = {} # {"num_question_max":500}
+dict_config_eval = {"num_question_max":5} #()
 
 
 if squad_dataset_en.language == 'en':
@@ -38,7 +38,14 @@ resultado = squad_evaluate_v1_1.evaluate_transfer_dataset(parm_dataset=squad_dat
                 parm_dict_config_eval=dict_config_eval,
                 parm_if_record=True,
                 parm_interval_print= 1000)
+"""
 
+resultado = squad_evaluate_v1_1.evaluate_transfer_nested(parm_dataset=squad_dataset_en,
+                parm_dict_config_model=dict_config_model,
+                parm_dict_config_eval=dict_config_eval,
+                parm_if_record=True,
+                parm_interval_print= 1000)
+"""
 # resposta = model.answer(dts)
 
 print(resultado)
