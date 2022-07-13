@@ -7,7 +7,6 @@ sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
 # from source.data_related import squad_related, rastro_evaluation_qa
 # from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
-
 from datasets import load_dataset
 from source.calculation.transfer_learning import squad_evaluate_v1_1
 from source.data_related import squad_related
@@ -18,11 +17,11 @@ squad_dataset_en =squad_related.load_squad_dataset_1_1('en')
 dict_config_model = {"num_doc_stride":128,\
                "num_top_k":3, \
                "num_batch_size":128, \
-               "num_max_answer_length":30, \
+               "num_max_answer_length":80, \
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":10}
 
-dict_config_eval = {"num_question_max":500}
+dict_config_eval = {} # {"num_question_max":500}
 
 
 if squad_dataset_en.language == 'en':
@@ -33,8 +32,6 @@ else:
     name_model = 'pierreguillou/bert-large-cased-squad-v1.1-portuguese'
     path_model = "models/transfer_learning/"+name_model
     model = Reader(pretrained_model_name_or_path=path_model, parm_dict_config=dict_config_model)
-
-dts = squad_dataset_en.dataset.select(range(dict_config_eval['num_question_max']))
 
 resultado = squad_evaluate_v1_1.evaluate_transfer_dataset(parm_dataset=squad_dataset_en,
                 parm_dict_config_model=dict_config_model,

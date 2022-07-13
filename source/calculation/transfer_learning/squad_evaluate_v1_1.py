@@ -204,7 +204,7 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
         'num_shot':99999  # usado valor numérico para não dar erro na carga depois
     }
     target_dataset = parm_dataset.dataset
-    if parm_dict_config_eval and isinstance(parm_dict_config_eval, dict) and 'num_question_max' in parm_dict_config_eval:
+    if parm_dict_config_eval is not None and isinstance(parm_dict_config_eval, dict) and 'num_question_max' in parm_dict_config_eval:
         target_dataset = target_dataset.select(range(parm_dict_config_eval['num_question_max']))
 
     num_question = 0

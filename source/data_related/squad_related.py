@@ -91,14 +91,32 @@ class SquadDataset(object):
             inputs = parm_tokenizer(row["question"], row["context"])
             return len(inputs["input_ids"])
 
-        def compute_input_length_question(row):
-            inputs = parm_tokenizer(row["question"])
+        def compute_input_length_one_column(row, column_name):
+            inputs = parm_tokenizer(row[column_name])
             return len(inputs["input_ids"])
 
 
+
+        df_answer = self._df[['answer_text']].explode('answer_text')
+        print("Answer: number of tokens:")
+        print(df_answer.describe())
+        df = pd.DataFrame()
+        df["answer_text"] = df_answer.apply(compute_input_length_one_column(column_name="answer_text"), axis=1)
+        fig, ax = plt.subplots()
+        df["answer_text"].hist(bins=100, grid=False, ec="C0", ax=ax)
+        max_val = df["answer_text"].max()
+        plt.xlabel("Number of tokens in answer")
+        ax.axvline(x=max_val, ymin=0, ymax=1, linestyle="--", color="C1",
+                label="Maximum sequence length")
+        plt.legend()
+        plt.ylabel("Token count")
+        plt.show()
+
+        """
+
         df = pd.DataFrame()
         df["n_tokens_question_context"] = self._df.apply(compute_input_length, axis=1)
-        df["n_tokens_question"] = self._df.apply(compute_input_length_question, axis=1)
+        df["n_tokens_question"] = self._df.apply(compute_input_length_one_column, axis=1)
         print("Number of tokens:")
         print(df.describe())
 
@@ -109,7 +127,7 @@ class SquadDataset(object):
         ax.axvline(x=max_val, ymin=0, ymax=1, linestyle="--", color="C1",
                 label="Maximum sequence length")
         plt.legend()
-        plt.ylabel("Count")
+        plt.ylabel("Token count")
         plt.show()
 
         fig, ax = plt.subplots()
@@ -119,8 +137,10 @@ class SquadDataset(object):
         ax.axvline(x=max_val, ymin=0, ymax=1, linestyle="--", color="C1",
                 label="Maximum sequence length")
         plt.legend()
-        plt.ylabel("Count")
+        plt.ylabel("Token count")
         plt.show()
+
+        """
 
 def evaluate_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imprimir=None):
     # parm_lista_pergunta_imprimir: exemplo repetidas ['571a52cb4faf5e1900b8a96b', '5730b9dc8ab72b1400f9c70f', '571a50df4faf5e1900b8a960']

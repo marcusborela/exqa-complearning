@@ -20,7 +20,7 @@ Para configurar vscode para jupyter
 
 pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pytorch.org torch==1.10.2+cu113 torchvision==0.11.3+cu113 torchaudio==0.10.2+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
 
-pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pytorch.org -f requirements.txt
+pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org --trusted-host pytorch.org -r requirements.txt
 
 Para baixar modelo de huggingface:
     git clone https://huggingface.co/unicamp-dl/ptt5-base-en-pt-msmarco-100k-v2
