@@ -22,7 +22,7 @@ dict_config_model = {"num_doc_stride":128,\
 
 dict_config_eval = {} # {"num_question_max":30}
 
-resultado = evaluate_transfer_dataset(parm_dataset=squad_dataset_pt,
+resultado = evaluate_transfer_dataset(parm_dataset=squad_dataset_en,
                 parm_dict_config_model=dict_config_model,
                 parm_dict_config_eval=dict_config_eval,
                 parm_interval_print= 1000  )
