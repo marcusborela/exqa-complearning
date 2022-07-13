@@ -161,7 +161,13 @@ class RastroEvaluationQa(object):
                 if property_type in (int, float, bool):
                     df_evaluation[property_name] = df_evaluation[property_name].astype(property_type)
         self._df_evaluation = df_evaluation
-        self._last_code = df_evaluation.shape[0]
+        self._last_code = df_evaluation.iloc[-1]['cod']
+
+
+
+    @property
+    def last_code(self):
+        return self._last_code
 
     def add(self, parm_evaluation:EvaluationQa):
         self._last_code += 1
@@ -182,7 +188,7 @@ class RastroEvaluationQa(object):
 
     @property
     def count(self):
-        return self._last_code
+        return len(self._df_evaluation)
 
     def imprime(self):
         print(f"count: \n{self.count}")
@@ -205,7 +211,7 @@ def persist_evaluation(parm_list_evaluation:List[EvaluationQa], parm_if_print:bo
     rastro_eval_qa.save()
     if parm_if_print:
         rastro_eval_qa.imprime()
-    return rastro_eval_qa._last_code+1 # código gerado
+    return rastro_eval_qa._last_code  # último código gerado
 
 dtype_calculated_metric_per_question = {
     'cod_evaluation':int,

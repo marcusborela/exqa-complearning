@@ -1,7 +1,3 @@
 cod,name_learning_method,ind_language,name_model,name_device,descr_filter,num_question,num_batch_size,num_top_k,num_factor_multiply_top_k,datetime_execution,time_execution_total,time_execution_per_question,num_doc_stride,num_max_answer_length,if_handle_impossible_answer,ind_format_prompt,descr_task_prompt,num_shot
-1,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{},10570,1,3,8,2022-07-06 14:55:06,2205,209,30,40,False,,,99999
-2,transfer,pt,pierreguillou/bert-large-cased-squad-v1.1-portuguese,cuda:0,{},10570,1,3,10,2022-07-06 15:58:15,2553,242,128,30,False,,,99999
-3,transfer,pt,pierreguillou/bert-large-cased-squad-v1.1-portuguese,cuda:0,{},10570,1,3,10,2022-07-06 16:40:50,2803,265,30,40,False,,,99999
-4,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{},10570,128,3,10,2022-07-11 22:59:10,2136,202,128,80,False,,,99999
-5,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{'num_question_max': 5},5,1,3,10,2022-07-13 11:55:38,2,468,128,80,False,,,99999
-6,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{'num_question_max': 5},5,128,3,10,2022-07-13 12:01:09,1,209,128,80,False,,,99999
+8,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{},10570,128,3,10,2022-07-13 12:06:48,2161,204,128,80,False,,,99999
+9,transfer,pt,pierreguillou/bert-large-cased-squad-v1.1-portuguese,cuda:0,{},10570,128,3,10,2022-07-13 12:43:45,2566,243,128,80,False,,,99999

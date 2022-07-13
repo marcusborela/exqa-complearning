@@ -21,7 +21,7 @@ dict_config_model = {"num_doc_stride":128,\
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":10}
 
-dict_config_eval = {} # {"num_question_max":5}
+dict_config_eval =  {"num_question_max":5} # {}
 
 
 if squad_dataset_en.language == 'en':
