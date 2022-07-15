@@ -7,8 +7,10 @@ from typing import  List, Dict
 from copy import deepcopy
 import torch
 from transformers import pipeline
+from transformers import AutoTokenizer, GPTJForCausalLM
 from transformers import GPTNeoForCausalLM, GPT2Tokenizer
-##from source.calculation import util_modelo
+##from transformers import GPTNeoXForCausalLM, GPTNeoXTokenizerFast
+## from source.calculation import util_modelo
 
 # import transformers
 # print(f"transformers.__version__ {transformers.__version__}")
@@ -80,12 +82,18 @@ def formatar_retirar_duplicatas(lista_resposta:List[Dict])-> List[Dict]:
 
 
 class Reader(): # pylint: disable=missing-class-docstring
-    _dict_parameters_example = {"num_doc_stride":128,\
-               "num_top_k":3, \
-               "num_max_answer_length":30, \
-               "num_batch_size":20, \
-               "if_handle_impossible_answer":False, \
-               "num_factor_multiply_top_k":3}
+    _dict_parameters_example = {'answer_start': 'Resposta:',
+                    'answer_stop': ['.', '\n', '\n'],
+                    'answer_skips': 0,
+                    'generator_sample': False,
+                    'generator_temperature': 1,
+                    'answer_max_length': 2048,
+                    'prompt_format': ('''Instrução: Com base no texto abaixo, responda à pergunta:
+
+Texto: {context}
+
+Pergunta: {question}
+Resposta:''')}
 
     def __init__(self,
                  pretrained_model_name_or_path: str,
@@ -122,9 +130,9 @@ class Reader(): # pylint: disable=missing-class-docstring
         ##self.num_factor_multiply_top_k = parm_dict_config["num_factor_multiply_top_k"]
         ##self.max_seq_len = self.model.config.max_position_embeddings
 
-        ##self.pipe = pipeline("question-answering", model=self.model,\
+        ##self.pipe = pipeline('text-generation', model=self.model,\
         ##                     tokenizer=self.tokenizer,\
-        ##                     device=self.device)
+        ##                     device=0, framework='pt')
 
     @property
     def info(self):
@@ -140,14 +148,25 @@ class Reader(): # pylint: disable=missing-class-docstring
 
     @staticmethod
     def get_model(pretrained_model_name_or_path: str,
-                  *args, **kwargs) -> GPTNeoForCausalLM:
-        return GPTNeoForCausalLM.from_pretrained(pretrained_model_name_or_path,
-                                             *args, **kwargs)
+                  *args, **kwargs):
+        if 'gpt-neox' in pretrained_model_name_or_path:
+            return GPTNeoXForCausalLM.from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+        if 'gpt-j' in pretrained_model_name_or_path:
+            return GPTJForCausalLM.from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+        if 'gpt-neo' in pretrained_model_name_or_path:
+            return GPTNeoForCausalLM.from_pretrained(pretrained_model_name_or_path, *args, **kwargs)
+        return None
 
     @staticmethod
     def get_tokenizer(pretrained_model_name_or_path: str,
-                      *args, batch_size: int = 128, **kwargs) -> GPT2Tokenizer:
-        return GPT2Tokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
+                      *args, batch_size: int = 128, **kwargs):
+        if 'gpt-neox' in pretrained_model_name_or_path:
+            return GPTNeoXTokenizerFast.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
+        if 'gpt-j' in pretrained_model_name_or_path:
+            return AutoTokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
+        if 'gpt-neo' in pretrained_model_name_or_path:
+            return GPT2Tokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
+        return None
 
     @staticmethod
     def parse_answer(tokens, start_sequence, stop_sequence, skips):
@@ -222,39 +241,3 @@ class Reader(): # pylint: disable=missing-class-docstring
         #print(answer_text)
         return [{'prompt': prompt, 'gen_tokens': gen_tokens, 'answer_tokens': answer_tokens, 'answer_text': answer_text}]
 
-
-    def answer(self, parm_dataset) -> List[Dict]:
-        list_column_drop = []
-        for column_name in parm_dataset.column_names:
-            if column_name not in ('context', 'question'):
-                list_column_drop.append(column_name)
-
-        dts = parm_dataset.remove_columns(list_column_drop)
-        for column_name in ('context', 'question'):
-            assert column_name in dts.column_names, f"Dataset must have column {column_name}. It has {dts.column_names}"
-
-        respostas = self.pipe(
-            data=dts,
-            handle_impossible_answer=self.if_handle_impossible_answer,
-            # como há casos de repostas idênticas em posições diferentes,
-            # precisamos pegar mais respostas para devolver top_k
-            top_k= self.num_top_k*self.num_factor_multiply_top_k,
-            # precisa??? self.max_seq_len = self.model.config.max_position_embeddings
-            doc_stride = self.num_doc_stride,
-            max_question_len = 50, # número de tokens.. pt: max 44, en: max 46
-            max_answer_len = self.num_max_answer_length,
-            max_seq_len = self.max_seq_len
-            )
-
-        if not isinstance(respostas, list):
-            lista_respostas = [respostas]
-        else:
-            lista_respostas = respostas
-
-        lista_resposta_formatada = []
-        for ndx_qas, respostas_qas in enumerate(lista_respostas):
-            if len(respostas_qas) < self.num_top_k:
-                print(f"Warning: #answers=len(lista_respostas)<self.num_top_k ndx_qas: {ndx_qas} {len(respostas_qas)} < {self.num_top_k}. Use num_factor_multiply_top_k if it is not desired.")
-            lista_resposta_formatada.append(formatar_retirar_duplicatas(respostas_qas)[:self.num_top_k])
-
-        return lista_resposta_formatada

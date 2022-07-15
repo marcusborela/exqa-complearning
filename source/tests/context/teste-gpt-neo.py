@@ -5,10 +5,10 @@ torch.cuda.empty_cache()
 print('torch.cuda.is_available():', torch.cuda.is_available())
 
 print('Loading model...')
-model = model = GPTNeoForCausalLM.from_pretrained("EleutherAI/gpt-neo-1.3B")
+model = GPTNeoForCausalLM.from_pretrained("EleutherAI/gpt-neo-1.3B")
 
 print('Loading tokenizer...')
-tokenizer = tokenizer = GPT2Tokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+tokenizer = GPT2Tokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
 
 print('Transfering model to GPU...')
 device = torch.device("cuda")
