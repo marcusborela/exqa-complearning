@@ -2,7 +2,6 @@ import time
 from typing import Dict
 
 from source.calculation.metric.qa_metric import calculate_metrics, calculate_metrics_grouped
-from source.calculation.transfer_learning.trata_reader import Reader
 from source.data_related.squad_related import SquadDataset
 from source.data_related import rastro_evaluation_qa
 from source.calculation import util_modelo
@@ -14,7 +13,8 @@ example_dict_config_model = {"num_doc_stride":128,\
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":3}
 
-def evaluate_transfer_nested(parm_dataset:SquadDataset, \
+def evaluate_learning_method_nested(parm_dataset:SquadDataset, \
+                      parm_reader, \
                       parm_dict_config_model:Dict, \
                       parm_dict_config_eval:Dict, \
                       parm_if_record:bool=True, \
@@ -39,22 +39,12 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
     assert parm_dict_config_model['num_top_k']>=3, f"To get EM@3 and F1@3 it must ask for at least 3 answers. It has {parm_dict_config_model['num_top_k']} answers asked."
     assert isinstance(parm_dict_config_eval,dict), f"parm_dict_config_eval must be a dict"
 
-    util_modelo.inicializa_seed(123) # para tentar repetir cálculo
-    if parm_dataset.language == 'en':
-        name_model = 'distilbert-base-cased-distilled-squad'
-        path_model = "models/transfer_learning/"+name_model
-        model = Reader(pretrained_model_name_or_path=path_model, parm_dict_config=parm_dict_config_model)
-    else:
-        name_model = 'pierreguillou/bert-large-cased-squad-v1.1-portuguese'
-        path_model = "models/transfer_learning/"+name_model
-        model = Reader(pretrained_model_name_or_path=path_model, parm_dict_config=parm_dict_config_model)
-
     dict_evaluation = {
         # context
         'name_learning_method':'transfer',
         'ind_language':parm_dataset.language,
-        'name_model':name_model,
-        'name_device':model.name_device,
+        'name_model':parm_reader.name_model,
+        'name_device':parm_reader.name_device,
         'descr_filter':str(parm_dict_config_eval),
         # números gerais
         'datetime_execution': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -80,14 +70,14 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
     metric_per_question = {}
     num_question = 0
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
-    print(f"Evalating in dataset {parm_dataset.name} model \n{model.info} ")
+    print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
     tstart = time.time()
     for article in parm_dataset.nested_json:
         for paragraph in article['paragraphs']:
             for qa in paragraph['qas']:
                 num_question += 1
                 # calcular resposta
-                resposta = model.answer_one_question(texto_contexto=paragraph['context'],\
+                resposta = parm_reader.answer_one_question(texto_contexto=paragraph['context'],\
                                         texto_pergunta=qa['question'])
                 # print(f"resposta {resposta}")
                 ground_truths = list(map(lambda x: x['text'], qa['answers']))
@@ -149,7 +139,8 @@ def evaluate_transfer_nested(parm_dataset:SquadDataset, \
     return evaluation.info
 
 
-def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
+def evaluate_learning_method_dataset(parm_dataset:SquadDataset, \
+                      parm_reader, \
                       parm_dict_config_model:Dict, \
                       parm_dict_config_eval:Dict, \
                       parm_if_record:bool=True, \
@@ -174,23 +165,12 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
     assert parm_dict_config_model['num_top_k']>=3, f"To get EM@3 and F1@3 it must ask for at least 3 answers. It has {parm_dict_config_model['num_top_k']} answers asked."
     assert isinstance(parm_dict_config_eval,dict), f"parm_dict_config_eval must be a dict"
 
-    util_modelo.inicializa_seed(123) # para tentar repetir cálculo
-
-    if parm_dataset.language == 'en':
-        name_model = 'distilbert-base-cased-distilled-squad'
-        path_model = "models/transfer_learning/"+name_model
-        model = Reader(pretrained_model_name_or_path=path_model, parm_dict_config=parm_dict_config_model)
-    else:
-        name_model = 'pierreguillou/bert-large-cased-squad-v1.1-portuguese'
-        path_model = "models/transfer_learning/"+name_model
-        model = Reader(pretrained_model_name_or_path=path_model, parm_dict_config=parm_dict_config_model)
-
     dict_evaluation = {
         # context
         'name_learning_method':'transfer',
         'ind_language':parm_dataset.language,
-        'name_model':name_model,
-        'name_device':model.name_device,
+        'name_model':parm_reader.name_model,
+        'name_device':parm_reader.name_device,
         'descr_filter':str(parm_dict_config_eval),
         # números gerais
         'datetime_execution': time.strftime('%Y-%m-%d %H:%M:%S'),
@@ -212,13 +192,13 @@ def evaluate_transfer_dataset(parm_dataset:SquadDataset, \
         target_dataset = target_dataset.select(range(parm_dict_config_eval['num_question_max']))
 
     num_question = 0
-    print(f"Evalating in dataset {parm_dataset.name} model \n{model.info} ")
+    print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
 
     num_question = len(target_dataset)
     tstart = time.time()
 
     # calcular resposta
-    lista_resposta = model.answer(parm_dataset=target_dataset)
+    lista_resposta = parm_reader.answer(parm_dataset=target_dataset)
     # print(f"resposta {resposta}")
 
 

@@ -102,10 +102,11 @@ class Reader(): # pylint: disable=missing-class-docstring
         # self.device = next(self.model.parameters(), None).device
 
         # Since we are using our model only for inference, switch to `eval` mode:
-        self.model = self.get_model(pretrained_model_name_or_path).to(self.device).eval()
-
-        self.tokenizer = self.get_tokenizer(pretrained_model_name_or_path)
-        self.pretrained_model_name_or_path = pretrained_model_name_or_path
+        self.name_model = pretrained_model_name_or_path
+        path_model = "models/transfer_learning/"+pretrained_model_name_or_path
+        self.model = self.get_model(path_model).to(self.device).eval()
+        self.tokenizer = self.get_tokenizer(path_model)
+        self.path_model = path_model
         # não usado # Automatic Mixed Precision self.use_amp = use_amp
         self.num_batch_size = parm_dict_config["num_batch_size"]
         self.num_top_k = parm_dict_config["num_top_k"]
@@ -122,7 +123,7 @@ class Reader(): # pylint: disable=missing-class-docstring
 
     @property
     def info(self):
-        return {"name":self.pretrained_model_name_or_path,\
+        return {"name":self.name_model,\
                 "device": self.name_device,\
                 "top_k": self.num_top_k,\
                 "batch_size": self.num_batch_size,\
@@ -133,15 +134,15 @@ class Reader(): # pylint: disable=missing-class-docstring
                 "max_seq_len": self.max_seq_len}
 
     @staticmethod
-    def get_model(pretrained_model_name_or_path: str,
+    def get_model(path_model: str,
                   *args, **kwargs) -> AutoModelForQuestionAnswering:
-        return AutoModelForQuestionAnswering.from_pretrained(pretrained_model_name_or_path,
+        return AutoModelForQuestionAnswering.from_pretrained(path_model,
                                                           *args, **kwargs)
 
     @staticmethod
-    def get_tokenizer(pretrained_model_name_or_path: str,
+    def get_tokenizer(path_model: str,
                       *args, batch_size: int = 128, **kwargs) -> AutoTokenizer:
-        return AutoTokenizer.from_pretrained(pretrained_model_name_or_path, use_fast=False, *args, **kwargs)
+        return AutoTokenizer.from_pretrained(path_model, use_fast=False, *args, **kwargs)
 
     def answer_one_question(self, texto_pergunta: str, texto_contexto: str) -> List[Dict]:
 
