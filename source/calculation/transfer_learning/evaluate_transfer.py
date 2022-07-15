@@ -16,7 +16,7 @@ squad_dataset_pt = squad_related.load_squad_dataset_1_1(parm_language='pt')
 dict_config_model = {"num_doc_stride":128,\
                "num_top_k":3, \
                "num_batch_size":128, \
-               "num_max_answer_length":160, \
+               "num_max_answer_length":40, \
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":10}
 
