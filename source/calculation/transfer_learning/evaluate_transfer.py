@@ -24,14 +24,14 @@ def evaluate_transfer_method(parm_language:str, parm_dict_config_model:Dict, par
     if parm_language == 'en':
         squad_dataset = squad_related.load_squad_dataset_1_1(parm_language='en')
         name_model = 'distilbert-base-cased-distilled-squad'
-        model = Reader(pretrained_model_name_or_path=name_model, parm_dict_config=parm_dict_config_model)
+        model = Reader(parm_name_model=name_model, parm_dict_config=parm_dict_config_model)
     else:
         squad_dataset = squad_related.load_squad_dataset_1_1(parm_language='pt')
         name_model = 'pierreguillou/bert-large-cased-squad-v1.1-portuguese'
-        model = Reader(pretrained_model_name_or_path=name_model, parm_dict_config=parm_dict_config_model)
+        model = Reader(parm_name_model=name_model, parm_dict_config=parm_dict_config_model)
 
 
-    resultado = squad_evaluate_v1_1.evaluate_transfer_method_nested(parm_dataset=squad_dataset,
+    resultado = squad_evaluate_v1_1.evaluate_learning_method_nested(parm_dataset=squad_dataset,
                     parm_reader = model,
                     parm_dict_config_model=dict_config_model,
                     parm_dict_config_eval=dict_config_eval,
@@ -55,8 +55,8 @@ dict_config_model = {"num_doc_stride":128,\
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":10}
 
-dict_config_eval = {}
-# dict_config_eval = {"num_question_max": 2}
+# dict_config_eval = {}
+dict_config_eval = {"num_question_max": 2}
 
 evaluate_transfer_method('pt', dict_config_model)
 #evaluate_transfer_method('en', dict_config_model)
