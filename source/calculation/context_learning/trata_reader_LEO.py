@@ -80,7 +80,7 @@ class Reader(): # pylint: disable=missing-class-docstring
 
     @staticmethod
     def parse_answer(tokens, start_sequence, stop_sequence, skips):
-        tokens = tokens.squeeze()
+        #tokens = tokens.squeeze()
         check_index = 0
         status = 'ignoring'
         start_index = 0
@@ -111,7 +111,16 @@ class Reader(): # pylint: disable=missing-class-docstring
                 else:
                     check_index = 0
             
-        return tokens[start_index:stop_index].unsqueeze(dim=0)
+        return tokens[start_index:stop_index]#.unsqueeze(dim=0)
+
+    def struct_answer(self, prompt, gen_tokens, start_sequence, stop_sequence, skips, tokenizer):
+        result = []
+        for i, response in enumerate(gen_tokens):
+            gen_text = ''.join(tokenizer.batch_decode(response)).strip()
+            answer_tokens = self.parse_answer(response, start_sequence, stop_sequence, skips)
+            answer_text = ''.join(tokenizer.batch_decode(answer_tokens)).strip()
+            result.append({'prompt': prompt, 'gen_tokens': response, 'gen_text': gen_text, 'answer_tokens': answer_tokens, 'answer_text': answer_text})
+        return result
 
     def answer_one_question(self, texto_pergunta: str, texto_contexto: str) -> List[Dict]:
 
@@ -137,21 +146,17 @@ class Reader(): # pylint: disable=missing-class-docstring
                 do_sample=self.generator_sample,
                 temperature=self.generator_temperature,
                 max_length=prompt_len + self.answer_max_length,
+                num_beams=10,
+                early_stopping=True,
+                num_return_sequences=5,
             )
+
+        print(gen_tokens.tolist())
+        exit()
         #gen_text = self.tokenizer.batch_decode(gen_tokens)[0]
         #print(gen_text)
 
-        #print('Extracting answer...')
         start_sequence = self.tokenizer(self.answer_start, return_tensors="pt").input_ids.squeeze()
         stop_sequence = self.tokenizer(self.answer_stop, return_tensors="pt").input_ids.squeeze()
-        answer_tokens = self.parse_answer(gen_tokens, start_sequence, stop_sequence, self.answer_skips)
-        #print(answer_tokens)
 
-        #print('Decoding answer...')
-        answer_text = self.tokenizer.batch_decode(answer_tokens)[0].strip()
-
-        #print('Decoding generation...')
-        gen_text = self.tokenizer.batch_decode(gen_tokens)[0].strip()
-
-        #print(answer_text)
-        return [{'prompt': prompt, 'gen_tokens': gen_tokens, 'gen_text': gen_text, 'answer_tokens': answer_tokens, 'answer_text': answer_text}]
+        return self.struct_answer(prompt, gen_tokens, start_sequence, stop_sequence, self.answer_skips, self.tokenizer)
