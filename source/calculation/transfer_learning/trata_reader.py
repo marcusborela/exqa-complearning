@@ -91,6 +91,9 @@ class Reader(): # pylint: disable=missing-class-docstring
     def __init__(self,
                  parm_name_model: str,
                  parm_dict_config:Dict):
+        # para evitar estouro memória gpu
+        torch.cuda.empty_cache()
+
         if parm_dict_config is None:
             parm_dict_config = deepcopy(Reader._dict_parameters_example)
         msg_dif = util_modelo.compare_dicionarios_chaves(Reader._dict_parameters_example, parm_dict_config,
@@ -99,13 +102,11 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         self.name_device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(self.name_device)
-        # self.device = next(self.model.parameters(), None).device
 
         # Since we are using our model only for inference, switch to `eval` mode:
         self.name_model = parm_name_model
         self.path_model = "models/transfer_learning/"+self.name_model
-        self.model = self.get_model(self.path_model).to(self.device).eval()
-        self.tokenizer = self.get_tokenizer(self.path_model)
+
 
         # não usado # Automatic Mixed Precision self.use_amp = use_amp
         self.num_batch_size = parm_dict_config["num_batch_size"]
@@ -114,12 +115,21 @@ class Reader(): # pylint: disable=missing-class-docstring
         self.if_handle_impossible_answer = parm_dict_config["if_handle_impossible_answer"]
         self.num_max_answer_length = parm_dict_config["num_max_answer_length"]
         self.num_factor_multiply_top_k = parm_dict_config["num_factor_multiply_top_k"]
-        self.max_seq_len = self.model.config.max_position_embeddings
 
-        self.pipe = pipeline("question-answering", model=self.model,\
-                             tokenizer=self.tokenizer,\
+        self.pipe = pipeline("question-answering", model=self.get_model(self.path_model).to(self.device).eval(),\
+                             tokenizer=self.get_tokenizer(self.path_model),\
                              batch_size=self.num_batch_size,\
                              device=self.device, framework='pt')
+        self.max_seq_len = self.pipe.model.config.max_position_embeddings
+
+    @property
+    def tokenizer(self):
+        return self.pipe.tokenizer
+
+
+    @property
+    def model(self):
+        return self.pipe.model
 
     @property
     def info(self):

@@ -15,9 +15,11 @@ pylint-report.txt
 models/*/*/*/*.bin
 models/*/*/*/*.msgpack
 models/*/*/*/*.h5
+models/*/*/*/*.pt
 models/*/*/*.bin
 models/*/*/*.msgpack
 models/*/*/*.h5
+models/*/*/*.pt
 coverage_html_report/
 old_*
 .vs/*
