@@ -1,4 +1,4 @@
-from source.calculation.context_learning.trata_reader2 import Reader
+from trata_reader import Reader
 
 
 parm_dict_config = {
