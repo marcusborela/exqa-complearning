@@ -105,7 +105,7 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         self.pipe = pipeline("text-generation", model=self.get_model(self.path_model).to(self.device).eval(),\
                               tokenizer=self.get_tokenizer(self.path_model),\
-                              device=self.device)
+                              device=self.device,framework='pt')
 
 
         self.atualiza_parametros_resposta(parm_dict_config)
@@ -168,11 +168,11 @@ class Reader(): # pylint: disable=missing-class-docstring
     @staticmethod
     def get_model(path_model: str,
                   *args, **kwargs):
-        # return GPTJForCausalLM.from_pretrained(path_model, *args, **kwargs)
-        # return GPTNeoForCausalLM.from_pretrained(path_model, *args, **kwargs)
         if os.path.isfile(path_model+"/pytorch_model_saved.pt"):
             return torch.load(path_model+"/pytorch_model_saved.pt")
         else:
+            # return GPTJForCausalLM.from_pretrained(path_model, *args, **kwargs)
+            # return GPTNeoForCausalLM.from_pretrained(path_model, *args, **kwargs)
             return GPTJForCausalLM.from_pretrained(
             path_model,
             revision="float16",
@@ -211,6 +211,7 @@ class Reader(): # pylint: disable=missing-class-docstring
             max_new_tokens = self.num_max_answer_length,
             min_length = 2,
             num_return_sequences = self.num_top_k,
+            num_beams =  self.num_top_k,
             do_sample = self.if_do_sample,
             temperature = self.num_temperature,
             length_penalty = self.val_length_penalty, # self.num_length_penalty \
