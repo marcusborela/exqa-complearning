@@ -28,9 +28,10 @@ dict_prompt_format ={
 104: {"prompt": instrucao_en + exemplo2_en_tpp + texto_questao_resposta_en, "num_shot":2, "format_example": "tpp"},
 }
 
-for cod, body in list(dict_prompt_format.items()):
-    print('Codigo:', cod, 'Shots:', body['num_shot'])
-    if "format_example" in body:
-        print("format_example", body["format_example"])
-    print(body['prompt'])
-    print('================')
+def imprime_prompt_format():
+    for cod, body in list(dict_prompt_format.items()):
+        print('Codigo:', cod, 'Shots:', body['num_shot'])
+        if "format_example" in body:
+            print("format_example", body["format_example"])
+        print(body['prompt'])
+        print('================')

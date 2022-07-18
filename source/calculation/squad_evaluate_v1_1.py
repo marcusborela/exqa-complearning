@@ -1,6 +1,7 @@
 import time
 from typing import Dict
 import torch
+import GPUtil
 
 from source.calculation.metric.qa_metric import calculate_metrics, calculate_metrics_grouped
 from source.data_related.squad_related import SquadDataset
@@ -112,7 +113,15 @@ def evaluate_learning_method_nested(parm_dataset:SquadDataset, \
                     F1:{round(100.0 * f1 / num_question,2)} \
                     EM@3:{round(100.0 * exact_match_at_3 / num_question,2)} \
                     F1@3:{round(100.0 * f1_at_3 / num_question,2)}")
+                    GPUs = GPUtil.getGPUs()
+                    gpu = GPUs[0]
+                    print(f"Antes empty_cache GPU Used: {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
                     torch.cuda.empty_cache()
+                    time.sleep(1)
+                    GPUs = GPUtil.getGPUs()
+                    gpu = GPUs[0]
+                    print(f"Após empty_cache GPU Used:  {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
+
                 if num_question >= num_question_max:
                     break
             if num_question >= num_question_max:
@@ -228,7 +237,14 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
             F1:{round(100.0 * f1 / num_question,2)} \
             EM@3:{round(100.0 * exact_match_at_3 / num_question,2)} \
             F1@3:{round(100.0 * f1_at_3 / num_question,2)}")
+            GPUs = GPUtil.getGPUs()
+            gpu = GPUs[0]
+            print(f"Antes empty_cache GPU Used: {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
             torch.cuda.empty_cache()
+            time.sleep(1)
+            GPUs = GPUtil.getGPUs()
+            gpu = GPUs[0]
+            print(f"Após empty_cache GPU Used:  {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
 
         if num_question >= num_question_max:
             break

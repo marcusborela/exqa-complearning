@@ -7,10 +7,13 @@ sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
 # from source.data_related import squad_related, rastro_evaluation_qa
 # from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
-
+import GPUtil
 
 from source.data_related import rastro_evaluation_qa
-print(bool(0.0))
+
+GPUs = GPUtil.getGPUs()
+gpu = GPUs[0]
+print(f"GPU Used: {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
 
 exit()
 rastro_eval_qa = rastro_evaluation_qa.RastroEvaluationQa()

@@ -15,3 +15,4 @@ sentence_transformers==2.0.0
 jsonschema==3.1.1
 datasets==2.3.2
 matplotlib==3.5.2
+GPUtil==1.4.0

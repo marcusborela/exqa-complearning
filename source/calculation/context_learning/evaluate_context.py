@@ -55,7 +55,6 @@ dict_config_model = {
                 "if_handle_impossible_answer": '',
                 # parâmetros context
                 'list_stop_words': ['.', '\n','!'],
-                'cod_prompt_format': 102.,
                 'if_do_sample': False,
                 "val_length_penalty":0.,
                 'val_temperature': 0.1,
@@ -66,18 +65,124 @@ results = []
 # dict_config_eval = {"num_question_max": 8}
 dict_config_eval = {}
 
-name_model = "EleutherAI/gpt-j-6B"
-
-dict_config_model['cod_prompt_format']= 101.
 sigla_linguagem = 'en'
+name_model = "EleutherAI/gpt-neo-1.3B"
+dict_config_model['cod_prompt_format']= 101.
 resultado = evaluate_context_method(sigla_linguagem,
             name_model,
             dict_config_model,
             dict_config_eval,
             parm_if_trace=False,
             parm_if_record=True,
-            parm_interval_print=100)
+            parm_interval_print=50)
 results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 102.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 103.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 104.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+name_model = "EleutherAI/gpt-j-6B"
+dict_config_model['cod_prompt_format']= 102.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 103.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 104.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+name_model = "EleutherAI/gpt-neo-1.3B"
+dict_config_model['cod_prompt_format']= 101.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 102.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 103.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 104.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+
+print(results)
+
+"""
 
 dict_config_model['cod_prompt_format']= 1.
 sigla_linguagem = 'pt'
@@ -87,7 +192,7 @@ resultado = evaluate_context_method(sigla_linguagem,
             dict_config_eval,
             parm_if_trace=False,
             parm_if_record=True,
-            parm_interval_print=100)
+            parm_interval_print=50)
 results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
 print(results)
 
@@ -136,3 +241,4 @@ resultado = evaluate_context_method(sigla_linguagem,
 
 print(resultado)
 
+"""
