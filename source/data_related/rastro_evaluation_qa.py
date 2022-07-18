@@ -89,14 +89,14 @@ class EvaluationQa(object):
     # and after converted
     dtype_evaluation_conversion = {
         # Transfer Learning
-        'num_doc_stride':float, # to accept null values
-        'if_handle_impossible_answer':bool,
+        'num_doc_stride':float, # int, but float to accept null values
+        'if_handle_impossible_answer':float, # bool, but float to accetp null values
         'num_factor_multiply_top_k':float,
         # Context learning
-        "if_do_sample":bool,
+        "if_do_sample":float, # bool, but float to accetp null values
         "val_length_penalty":float,
         "val_temperature":float,
-        "cod_prompt_format":float, # to accept null values
+        "cod_prompt_format":float, # int, but float to accept null values
         "list_stop_words":str
     }
 
@@ -111,10 +111,14 @@ class EvaluationQa(object):
         for property_name, property_type in dtype_evaluation_without_code.items():
             if learning_method== 'transfer':
                 if property_name in ['num_doc_stride','if_handle_impossible_answer','num_factor_multiply_top_k']:
+                    if property_name.startswith('if_'):
+                        parm_evaluation_qa_data[property_name] = float(parm_evaluation_qa_data[property_name])
                     assert isinstance(parm_evaluation_qa_data[property_name], EvaluationQa.dtype_evaluation_conversion[property_name]), f"evaluation_qa.{property_name} must be {EvaluationQa.dtype_evaluation_conversion[property_name]}"
                     continue
             if learning_method== 'context':
                 if property_name in ['if_do_sample','val_length_penalty','val_temperature', "cod_prompt_format","list_stop_words"]:
+                    if property_name.startswith('if_'):
+                        parm_evaluation_qa_data[property_name] = float(parm_evaluation_qa_data[property_name])
                     assert isinstance(parm_evaluation_qa_data[property_name], EvaluationQa.dtype_evaluation_conversion[property_name]), f"evaluation_qa.{property_name} must be {EvaluationQa.dtype_evaluation_conversion[property_name]}"
                     continue
             assert isinstance(parm_evaluation_qa_data[property_name], property_type), f"evaluation_qa.{property_name} must be {property_type}"
@@ -135,6 +139,10 @@ class EvaluationQa(object):
         descr = f"Evaluation properties: {str(values)}"
         descr += f"\nEvaluation metrics: {[x.info for x in self._data['calculated_metric']]})"
         return descr
+
+    @property
+    def metric_info(self):
+        return {x.info for x in self._data['calculated_metric']}
 
     def imprime(self):
         print(self.info)
@@ -169,7 +177,7 @@ class RastroEvaluationQa(object):
 
         if df_calculated_metric.shape[0]>0:
             for property_name, property_type in CalculatedMetric.dtype_evaluation.items():
-                if property_type in (int, float, bool):
+                if property_type in (int, float):
                     df_calculated_metric[property_name] = df_calculated_metric[property_name].astype(property_type)
         self._df_calculated_metric = df_calculated_metric
 
@@ -184,8 +192,11 @@ class RastroEvaluationQa(object):
 
         if df_evaluation.shape[0]>0:
             for property_name, property_type in EvaluationQa.dtype_evaluation_conversion.items():
-                if property_type in (int, float, bool):
+                if property_type in (int, float):
                     df_evaluation[property_name] = df_evaluation[property_name].astype(property_type)
+                if property_type == bool:
+                    df_evaluation[property_name] = df_evaluation[property_name].astype(float)
+                    # df_evaluation[property_name] = df_evaluation[property_name].astype(bool)
         self._df_evaluation = df_evaluation
         self._last_code = df_evaluation.iloc[-1]['cod']
 

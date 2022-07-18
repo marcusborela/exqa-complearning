@@ -8,10 +8,10 @@ from copy import deepcopy
 import torch
 from transformers import pipeline
 from transformers import GPT2Tokenizer, GPTJForCausalLM
-# from transformers import GPT2Tokenizer, GPTNeoForCausalLM
+from transformers import GPTNeoForCausalLM
 from source.calculation import util_modelo
 from transformers import StoppingCriteria, StoppingCriteriaList
-from source.calculation.context_learning.prompt_format import dict_prompt_format
+from source.calculation.context_learning.prompt_format_bo import dict_prompt_format
 
 # import transformers
 # print(f"transformers.__version__ {transformers.__version__}")
@@ -104,12 +104,17 @@ class Reader(): # pylint: disable=missing-class-docstring
                               tokenizer=self.get_tokenizer(self.path_model),\
                               device=self.device,framework='pt')
 
+        # setting to avoid warning msg
+        #   Setting `pad_token_id` to `eos_token_id`:50256 for open-end generation.
+        #   The attention mask and the pad token id were not set. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+        self.pipe.tokenizer.pad_token = self.pipe.tokenizer.eos_token
+
 
         self.atualiza_parametros_resposta(parm_dict_config)
 
         # Se desejar salvar o modelo, para ficar mais rápido a carga
-        # torch.save(self.pipe.model, path_model+"/pytorch_model_saved.pt")
         #   gptj6b: muda de 4 minutos para 12 segundos
+        # torch.save(self.pipe.model, self.path_model+"/pytorch_model_saved.pt")
         self.max_seq_len = self.pipe.model.config.max_position_embeddings
 
 
@@ -121,9 +126,6 @@ class Reader(): # pylint: disable=missing-class-docstring
             'Esperado', 'Encontrado')
         assert msg_dif == "", f"Estrutura esperada de parm_dict_config não corresponde ao esperado {msg_dif}"
 
-
-        #self.tokenizer = self.get_tokenizer(self.path_model)
-        # não usado # Automatic Mixed Precision self.use_amp = use_amp
 
         self.num_top_k = parm_dict_config["num_top_k"]
         self.num_doc_stride = parm_dict_config["num_doc_stride"]
@@ -175,17 +177,21 @@ class Reader(): # pylint: disable=missing-class-docstring
         else:
             # return GPTJForCausalLM.from_pretrained(path_model, *args, **kwargs)
             # return GPTNeoForCausalLM.from_pretrained(path_model, *args, **kwargs)
-            return GPTJForCausalLM.from_pretrained(
-            path_model,
-            revision="float16",
-            torch_dtype=torch.float16,
-            low_cpu_mem_usage=True)
+            if 'neo' in path_model:
+                return GPTNeoForCausalLM.from_pretrained(
+                    path_model)
+            else:
+                return GPTJForCausalLM.from_pretrained(
+                path_model,
+                revision="float16",
+                torch_dtype=torch.float16,
+                low_cpu_mem_usage=True)
+
 
     @staticmethod
     def get_tokenizer(path_model: str,
                       *args, batch_size: int = 128, **kwargs) -> GPT2Tokenizer:
         return GPT2Tokenizer.from_pretrained(path_model, use_fast=False, *args, **kwargs)
-
     def answer_one_question(self, texto_pergunta: str, texto_contexto: str) -> List[Dict]:
 
         assert isinstance(texto_pergunta, str), f"Expected just one question, not {type(texto_pergunta)}"

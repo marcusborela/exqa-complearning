@@ -10,8 +10,11 @@ sys.path.append(os.path.abspath(r'.\.'))
 
 
 from source.data_related import rastro_evaluation_qa
+print(bool(0.0))
 
-{"texto_resposta":v if k == 'generated_text' else k:v for k,v in respostas.items()}
+exit()
+rastro_eval_qa = rastro_evaluation_qa.RastroEvaluationQa()
+rastro_eval_qa.imprime()
 
 """
 

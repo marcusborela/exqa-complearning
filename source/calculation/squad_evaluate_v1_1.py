@@ -86,7 +86,7 @@ def evaluate_learning_method_nested(parm_dataset:SquadDataset, \
     metric_per_question = {}
     num_question = 0
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
-    print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
+    # print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
     tstart = time.time()
     for article in parm_dataset.nested_json:
         for paragraph in article['paragraphs']:
@@ -143,7 +143,7 @@ def evaluate_learning_method_nested(parm_dataset:SquadDataset, \
     calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':'F1@3', 'value':round(f1_at_3,2)})
     evaluation.add_metric(calculate_metric)
 
-    print(f"Evaluation result: {evaluation.info}")
+    # print(f"Evaluation result: {evaluation.info}")
 
     if parm_if_record:
         # atualizar dataframes
@@ -152,12 +152,13 @@ def evaluate_learning_method_nested(parm_dataset:SquadDataset, \
                                             parm_dict_metric_per_question=metric_per_question)
 
 
-    return evaluation.info
+    return evaluation.metric_info
 
 def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
                       parm_reader, \
                       parm_dict_config_model:Dict, \
                       parm_dict_config_eval:Dict, \
+                      parm_if_trace:bool=False, \
                       parm_if_record:bool=True, \
                       parm_interval_print:int=100):
     """
@@ -174,12 +175,17 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
     """
     dict_evaluation = validate_config_eval(parm_dataset, parm_reader, parm_dict_config_model,parm_dict_config_eval)
 
+    #if parm_dataset.language == 'en':
+    #    assert parm_dict_config_model['cod_prompt_format'] > 100, f"Para inglês, deve-se usar cod_prompt_format > 100"
+    #elif parm_dataset.language == 'pt':
+    #    assert parm_dict_config_model['cod_prompt_format'] < 100, f"Para inglês, deve-se usar cod_prompt_format < 100"
+
     target_dataset = parm_dataset.dataset
     if parm_dict_config_eval is not None and isinstance(parm_dict_config_eval, dict) and 'num_question_max' in parm_dict_config_eval:
         target_dataset = target_dataset.select(range(parm_dict_config_eval['num_question_max']))
 
     num_question = 0
-    print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
+    # print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
 
 
 
@@ -192,7 +198,6 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
 
     num_question = 0
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
-    print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
     tstart = time.time()
     for qa in target_dataset:
         num_question += 1
@@ -208,6 +213,11 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
         exact_match_at_3 += metric_calculated['EM@3']
         f1_at_3 += metric_calculated['F1@3']
         metric_per_question[qa['id']] = metric_calculated
+        if parm_if_trace:
+            print(f"Pergunta id {qa['id']}:\n{qa['question']}")
+            print(f"Resposta:\n{resposta}")
+            print(f"Ground truth:\n{list_ground_truth}")
+            print(f"Métrica: {metric_calculated}")
 
 
         if num_question % parm_interval_print == 0:
@@ -246,7 +256,7 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
     calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':'F1@3', 'value':round(f1_at_3,2)})
     evaluation.add_metric(calculate_metric)
 
-    print(f"Evaluation result: {evaluation.info}")
+    # print(f"Evaluation result: {evaluation.info}")
 
     if parm_if_record:
         # atualizar dataframes
@@ -254,7 +264,7 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
         rastro_evaluation_qa.persist_metric_per_question(parm_cod_evaluation=cod_evaluation,\
                                             parm_dict_metric_per_question=metric_per_question)
 
-    return evaluation.info
+    return evaluation.metric_info
 
 def evaluate_learning_method_dataset(parm_dataset:SquadDataset, \
                       parm_reader, \
@@ -280,7 +290,7 @@ def evaluate_learning_method_dataset(parm_dataset:SquadDataset, \
         target_dataset = target_dataset.select(range(parm_dict_config_eval['num_question_max']))
 
     num_question = 0
-    print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
+    # print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
 
     num_question = len(target_dataset)
     tstart = time.time()
@@ -304,7 +314,7 @@ def evaluate_learning_method_dataset(parm_dataset:SquadDataset, \
         calculate_metric = rastro_evaluation_qa.CalculatedMetric({'cod_metric':metric, 'value':metric_value})
         evaluation.add_metric(calculate_metric)
 
-    print(f"Evaluation result: {evaluation.info}")
+    # print(f"Evaluation result: {evaluation.info}")
 
     if parm_if_record:
         # atualizar dataframes
@@ -315,5 +325,5 @@ def evaluate_learning_method_dataset(parm_dataset:SquadDataset, \
 
 
 
-    return evaluation.info
+    return evaluation.metric_info
 

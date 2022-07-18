@@ -28,12 +28,15 @@ m = re.search('(?<=abc)def', 'abcdef')
 
 def normalize_answer(s):
     """
-       added strip in 20220717
+        20220717, Borela
+            added strip
+        20220717, Borela
+            added portuguese articles, e \n, \t
     """
 
     """Lower text and remove punctuation, articles and extra whitespace."""
-    def remove_articles(text):
-        return re.sub(r'\b(a|an|the)\b', ' ', text)
+    def remove_articles_etc(text):
+        return re.sub(r'\b(a|an|the|o|os|as|um|uma|uns|umas|\n|\t)\b', ' ', text)
 
     def white_space_fix(text):
         return ' '.join(text.split())
@@ -45,9 +48,9 @@ def normalize_answer(s):
     def lower(text):
         return text.lower()
 
-    # texto_normalizado = white_space_fix(remove_articles(remove_punc(lower(s)))).strip()
+    # texto_normalizado = white_space_fix(remove_articles_etc(remove_punc(lower(s)))).strip()
     # print(f"Em normalize_answer. Antes: {s}; Depois: {texto_normalizado}")
-    return white_space_fix(remove_articles(remove_punc(lower(s)))).strip()
+    return white_space_fix(remove_articles_etc(remove_punc(lower(s)))).strip()
 
 def f1_score(prediction, ground_truth):
     pred_tokens = normalize_answer(prediction).split()
