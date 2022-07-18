@@ -11,7 +11,7 @@ from transformers import GPT2Tokenizer, GPTJForCausalLM
 from transformers import GPTNeoForCausalLM
 from source.calculation import util_modelo
 from transformers import StoppingCriteria, StoppingCriteriaList
-from source.calculation.context_learning.prompt_format_bo import dict_prompt_format
+from source.calculation.context_learning.prompt_format import dict_prompt_format
 
 # import transformers
 # print(f"transformers.__version__ {transformers.__version__}")

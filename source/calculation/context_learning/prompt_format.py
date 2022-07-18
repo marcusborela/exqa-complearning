@@ -2,20 +2,20 @@
 # 'Instruction: Based on the text below, answer the question:\n\nText:{context}\n\nQuestion:{question}\nResponse:')}
 # 'prompt_format': ('Instrução: Com base no texto abaixo, responda à pergunta:\n\nTexto: {context}\n\nPergunta: {question}\nResposta:'
 
-instrucao_pt = 'Instrução: Usando trecho contido no texto, responda de forma sucinta, evitando repetir palavras da pergunta:\n\n'
-instrucao_en = 'Instruction: Using an excerpt contained in the text, answer succinctly, avoiding repeating words from the question:\n\n'
+instrucao_pt = 'Instrução: Com base no texto abaixo, responda de forma sucinta à pergunta, evitando repetir palavras da pergunta:\n\n'
+instrucao_en = 'Instruction: Based on the text below, answer the question succinctly, avoiding repeating words from the question:\n\n'
 
-exemplo1_pt = 'Exemplo:\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\nPergunta: Quem nasceu em 1980?\nResposta: Marcus\n\n'
-exemplo1_en = 'Example:\nText: Marcus was born in 1980 and has worked at TCU since 2005.\nQuestion: Who was born in 1980?\nAnswer: Marcus\n\n'
+exemplo1_pt = 'Exemplo:\n\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\n\nPergunta: Quem nasceu em 1980?\nResposta: Marcus\n\n'
+exemplo1_en = 'Example:\n\nText: Marcus was born in 1980 and has worked at TCU since 2005.\n\nQuestion: Who was born in 1980?\nAnswer: Marcus\n\n'
 
-exemplo2_pt_tptp = 'Exemplo:\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\nPergunta: Quem nasceu em 1980?\nResposta: Marcus\n\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\nPergunta: Em qual ano Marcus nasceu?\nResposta: 1980\n\n'
-exemplo2_en_tptp = 'Example:\nText: Marcus was born in 1980 and has worked at TCU since 2005.\nQuestion: Who was born in 1980?\nAnswer: Marcus\n\nText: Marcus was born in 1980 and has worked at TCU since 2005.\nQuestion: In which year was Marcus born?\nAnswer: 1980\n\n'
+exemplo2_pt_tptp = 'Exemplo:\n\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\n\nPergunta: Quem nasceu em 1980?\nResposta: Marcus\n\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\n\nPergunta: Em qual ano Marcus nasceu?\nResposta: 1980\n\n'
+exemplo2_en_tptp = 'Example:\n\nText: Marcus was born in 1980 and has worked at TCU since 2005.\n\nQuestion: Who was born in 1980?\nAnswer: Marcus\n\nText: Marcus was born in 1980 and has worked at TCU since 2005.\n\nQuestion: In which year was Marcus born?\nAnswer: 1980\n\n'
 
-exemplo2_pt_tpp = 'Exemplo:\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\nPergunta: Quem nasceu em 1980?\nResposta: Marcus\nPergunta: Em qual ano Marcus nasceu?\nResposta: 1980\n\n'
-exemplo2_en_tpp = 'Example:\nText: Marcus was born in 1980 and has worked at TCU since 2005.\nQuestion: Who was born in 1980?\nAnswer: Marcus\nQuestion: In which year was Marcus born?\nAnswer: 1980\n\n'
+exemplo2_pt_tpp = 'Exemplo:\n\nTexto: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\n\nPergunta: Quem nasceu em 1980?\nResposta: Marcus\nPergunta: Em qual ano Marcus nasceu?\nResposta: 1980\n\n'
+exemplo2_en_tpp = 'Example:\n\nText: Marcus was born in 1980 and has worked at TCU since 2005.\n\nQuestion: Who was born in 1980?\nAnswer: Marcus\nQuestion: In which year was Marcus born?\nAnswer: 1980\n\n'
 
-texto_questao_resposta_pt = 'Texto:{context}\nPergunta:{question}\nResposta:'
-texto_questao_resposta_en = 'Text:{context}\nQuestion:{question}\nAnswer:'
+texto_questao_resposta_pt = 'Texto:{context}\n\nPergunta:{question}\nResposta:'
+texto_questao_resposta_en = 'Text:{context}\n\nQuestion:{question}\nAnswer:'
 
 dict_prompt_format ={
 1: {"prompt": instrucao_pt + texto_questao_resposta_pt, "num_shot":0},
