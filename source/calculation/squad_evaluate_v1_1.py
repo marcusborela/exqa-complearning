@@ -256,8 +256,6 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
 
     return evaluation.info
 
-
-
 def evaluate_learning_method_dataset(parm_dataset:SquadDataset, \
                       parm_reader, \
                       parm_dict_config_model:Dict, \
@@ -318,5 +316,4 @@ def evaluate_learning_method_dataset(parm_dataset:SquadDataset, \
 
 
     return evaluation.info
-
 

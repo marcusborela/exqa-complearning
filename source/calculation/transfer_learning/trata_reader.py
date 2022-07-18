@@ -81,11 +81,22 @@ def formatar_retirar_duplicatas(lista_resposta:List[Dict])-> List[Dict]:
 
 
 class Reader(): # pylint: disable=missing-class-docstring
-    _dict_parameters_example = {"num_doc_stride":128,\
-               "num_top_k":3, \
-               "num_max_answer_length":30, \
-               "if_handle_impossible_answer":False, \
-               "num_factor_multiply_top_k":3}
+    _dict_parameters_example = {
+                    # parâmetros tarefa
+                    "learning_method": 'context',
+                    "num_top_k": 2,
+                    "num_max_answer_length":150,
+                    # parâmetros transfer - q&a
+                    "num_doc_stride": 0,
+                    "num_factor_multiply_top_k": 0,
+                    "if_handle_impossible_answer":False,
+                    # parâmetros context - text generation
+                    'list_stop_words': ['.', '\n', '!'],
+                    "val_length_penalty":2,
+                    'if_do_sample': False,
+                    'val_temperature': 1,
+                    'cod_prompt_format':1,
+}
 
     def __init__(self,
                  parm_name_model: str,
@@ -109,10 +120,11 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         # não usado # Automatic Mixed Precision self.use_amp = use_amp
         self.num_top_k = parm_dict_config["num_top_k"]
-        self.num_doc_stride = parm_dict_config["num_doc_stride"]
-        self.if_handle_impossible_answer = parm_dict_config["if_handle_impossible_answer"]
         self.num_max_answer_length = parm_dict_config["num_max_answer_length"]
-        self.num_factor_multiply_top_k = parm_dict_config["num_factor_multiply_top_k"]
+
+        self.num_doc_stride = int(parm_dict_config["num_doc_stride"])
+        self.if_handle_impossible_answer = parm_dict_config["if_handle_impossible_answer"]
+        self.num_factor_multiply_top_k = int(parm_dict_config["num_factor_multiply_top_k"])
 
         self.pipe = pipeline("question-answering", model=self.get_model(self.path_model).to(self.device).eval(),\
                              tokenizer=self.get_tokenizer(self.path_model),\

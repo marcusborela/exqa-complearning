@@ -16,6 +16,7 @@ from source.calculation import util_modelo
 
 
 def evaluate_transfer_method(parm_language:str, parm_dict_config_model:Dict, parm_interval_print:int=1000):
+    global dict_config_eval
 
     assert parm_language in ('en','pt'), f"parm_language must be in ('en','pt'). Found: {parm_language}"
     # tentativa de deixar os resultados repetíveis
@@ -31,7 +32,7 @@ def evaluate_transfer_method(parm_language:str, parm_dict_config_model:Dict, par
         model = Reader(parm_name_model=name_model, parm_dict_config=parm_dict_config_model)
 
 
-    resultado = squad_evaluate_v1_1.evaluate_learning_method_nested(parm_dataset=squad_dataset,
+    resultado = squad_evaluate_v1_1.evaluate_learning_method_one_by_one_dataset(parm_dataset=squad_dataset,
                     parm_reader = model,
                     parm_dict_config_model=dict_config_model,
                     parm_dict_config_eval=dict_config_eval,
@@ -45,19 +46,26 @@ def evaluate_transfer_method(parm_language:str, parm_dict_config_model:Dict, par
                     parm_interval_print= parm_interval_print  )
     """
 
+dict_config_model = {
+                # parâmetros complementares
+                "learning_method":'transfer',
+                "num_top_k": 3,
+                "num_max_answer_length":80,
+                # parâmetros transfer # deixar branco
+                "num_doc_stride": 128.,
+                "num_factor_multiply_top_k": 10.,
+                "if_handle_impossible_answer": False,
+                # parâmetros context
+                'list_stop_words': '',
+                'cod_prompt_format': '',
+                'if_do_sample': '',
+                "val_length_penalty":'',
+                'val_temperature': '',
+}
 
-
-
-dict_config_model = {"num_doc_stride":128,\
-               "num_top_k":3, \
-               "num_max_answer_length":40, \
-               "if_handle_impossible_answer":False, \
-               "num_factor_multiply_top_k":10}
-
-# dict_config_eval = {}
-dict_config_eval = {"num_question_max": 2}
+dict_config_eval = {}
+# dict_config_eval = {"num_question_max": 2}
 
 evaluate_transfer_method('pt', dict_config_model)
-#evaluate_transfer_method('en', dict_config_model)
-
+evaluate_transfer_method('en', dict_config_model)
 
