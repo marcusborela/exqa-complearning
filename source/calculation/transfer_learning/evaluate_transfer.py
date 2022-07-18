@@ -50,7 +50,6 @@ def evaluate_transfer_method(parm_language:str, parm_dict_config_model:Dict, par
 
 dict_config_model = {"num_doc_stride":128,\
                "num_top_k":3, \
-               "num_batch_size":128, \
                "num_max_answer_length":40, \
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":10}

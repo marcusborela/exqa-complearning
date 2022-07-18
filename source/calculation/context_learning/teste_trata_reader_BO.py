@@ -11,10 +11,10 @@ parm_dict_config = {
                 "num_max_answer_length":200,
                 # parâmetros context
                     'answer_start': 'Resposta:',
-                    'answer_stop': ['.', '\n', '\n'],
+                    'list_stop_words': ['.', '\n', '\n'],
                     'answer_skips': 0,
-                    'generator_sample': False,
-                    'generator_temperature': 1,
+                    'if_do_sample': False,
+                    'val_temperature': 1,
                     'prompt_format': ('''Instrução: Com base no texto abaixo, responda à pergunta:
 
 Texto: {context}

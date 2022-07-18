@@ -15,25 +15,56 @@ name_device:str="Name of device used. Rule: in ('cpu', 'cuda:0')"
 ## data
 descr_filter:str="Description of the filter, if applied,  in the dataset for qa selection. Ex.: 'len(contexto) + len(pergunta) < 1024'"
 
-## task
-num_batch_size:int="Size of the batch used in calculus. Equal 1 if answer calculated just for one question."
-num_top_k:int="Number of different answers considerated"
-num_factor_multiply_top_k:int="Number of answers considerated to treat repeated answers"
-num_max_answer_length:int="Maximum number of characters accepted in the response"
-
-## Transfer Learning
-num_doc_stride:int="Indicates the number of chars to be repeated in the division of large contexts, if necessary"
-if_handle_impossible_answer:bool::format 9="Indicates whether the model was considering the possibility of not having an answer to the question in the context"
-
-## Context learning
-ind_format_prompt:str="Indicates the format of the prompt in context learning. Must be in: (descr: "description; zero shot", descr_n: "description; shot: 1 context:n qas",descr_1:"description; shot: 1 context:1 qas")
-descr_task_prompt:str="Description of the task in the prompt"
-num_shot:int="Number of examples used in the prompt"
-
-
 # context information
 num_question:int="Number of questions evaluated"
 datetime_execution:datetime::format yyyy-yy-dd hh24:mi:ss="Date and time of execution start"
 time_execution_total:int::format 99999="Total execution time of the evaluation (in seconds)"
 time_execution_per_question:int::format 9999="Average evaluation execution time per question (in miliseconds)"
 
+
+## task
+num_top_k:int="Number of different answers considerated"
+num_factor_multiply_top_k:int="Number of answers considerated to treat repeated answers"
+num_max_answer_length:int="Maximum number of characters accepted in the response"
+
+
+## Transfer Learning
+num_doc_stride:int="Indicates the number of chars to be repeated in the division of large contexts, if necessary"
+if_handle_impossible_answer:bool::format 9="Indicates whether the model was considering the possibility of not having an answer to the question in the context"
+
+## Context learning
+#    source: https://github.com/huggingface/transformers/blob/main/src/transformers/generation_utils.py
+if_do_sample:bool="Whether or not to use sampling ; use greedy decoding otherwise"
+val_length_penalty:float="Exponential penalty to the length. 1.0 means that the beam score is penalized by the sequence length.\
+                 0.0 means no penalty. Set to values < 0.0 in order to encourage the model to generate longer\
+                 sequences, to a value > 0.0 in order to encourage the model to produce shorter sequences."
+val_temperature:float="The value used to module the next token probabilities"
+cod_prompt_format:int="Format used to ask a question. Implies num_shot. Values in dict_prompt_format (prompt_format.py)."
+list_stop_words:str="List of words to stop generation of answer"
+
+
+
+
+Mudanças:
+17/7/2022
+Deleted:
+num_batch_size:int="Size of the batch used in calculus. Equal 1 if answer calculated just for one question."
+
+Adjusted description order with file order
+
+ind_format_prompt -> cod_format_prompt
+Excluido:
+descr_task_prompt:str="Description of the task in the prompt"
+Criar dict_format_prompt:
+    cod, descr, num_shot
+Antes:
+ind_format_prompt,descr_task_prompt,num_shot
+,,,99999
+Depois:
+if_do_sample,val_length_penalty,val_temperature,cod_format_prompt,list_stop_words
+,,,,,
+answer_stop -> list_stop_words
+generator_sample -> if_do_sample
+val_length_penalty
+generator_temperature -> val_temperature
+prompt_format > descr_prompt_format

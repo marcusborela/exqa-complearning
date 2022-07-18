@@ -7,6 +7,50 @@ sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
 # from source.data_related import squad_related, rastro_evaluation_qa
 # from source.calculation.transfer_learning.squad_evaluate_v1_1 import evaluate_transfer
+
+
+from source.data_related import rastro_evaluation_qa
+
+{"texto_resposta":v if k == 'generated_text' else k:v for k,v in respostas.items()}
+
+"""
+
+rastro_eval_qa = rastro_evaluation_qa.RastroEvaluationQa()
+# rastro_eval_qa.imprime()
+print(rastro_eval_qa.df_evaluation.iloc[1])
+print(rastro_eval_qa.df_evaluation['name_model'].iloc[1])
+
+# rastro_eval_qa.save()
+
+
+prompt_format = '''Instrução: Usando palavras do texto abaixo, responda à pergunta:
+
+Texto: {context}
+
+Pergunta: {question}
+Resposta:'''
+
+prompt_format = repr('''Instrução: Usando palavras do texto abaixo, responda à pergunta:
+
+Texto: {context}
+
+Pergunta: {question}
+Resposta:''')
+
+
+
+print(str(prompt_format))
+print('-'*20)
+print(repr(prompt_format))
+print('-'*20)
+
+
+answer_stop -> list_stop_words
+generator_sample -> if_do_sample
+val_length_penalty
+generator_temperature -> num_temperature
+prompt_format > descr_prompt_format
+
 from datasets import load_dataset
 from source.calculation.transfer_learning import squad_evaluate_v1_1
 from source.data_related import squad_related
@@ -72,7 +116,7 @@ resultado_en = evaluate_transfer(parm_dataset=squad_dataset_en,
                 parm_interval_print= 15  )
 
 
-"""
+
 
 from source.data_related import rastro_evaluation_qa
 

@@ -27,6 +27,9 @@ import re
 m = re.search('(?<=abc)def', 'abcdef')
 
 def normalize_answer(s):
+    """
+       added strip in 20220717
+    """
 
     """Lower text and remove punctuation, articles and extra whitespace."""
     def remove_articles(text):
@@ -42,8 +45,9 @@ def normalize_answer(s):
     def lower(text):
         return text.lower()
 
-    return white_space_fix(remove_articles(remove_punc(lower(s))))
-
+    # texto_normalizado = white_space_fix(remove_articles(remove_punc(lower(s)))).strip()
+    # print(f"Em normalize_answer. Antes: {s}; Depois: {texto_normalizado}")
+    return white_space_fix(remove_articles(remove_punc(lower(s)))).strip()
 
 def f1_score(prediction, ground_truth):
     pred_tokens = normalize_answer(prediction).split()
@@ -116,7 +120,6 @@ def calculate_metrics(parm_list_answer, parm_list_ground_truths):
 
     return {'EM':em, 'F1':f1, 'EM@3':em_at_3, 'F1@3':f1_at_3}
 
-
 def calculate_metrics_grouped(lista_resposta, target_dataset, num_question:int):
     metric_per_question = {}
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
@@ -124,8 +127,8 @@ def calculate_metrics_grouped(lista_resposta, target_dataset, num_question:int):
         list_ground_truth = target_dataset[ndx]['answer_text']
         # ground_truths = list(map(lambda x: x['text'], list_ground_truth))
         metric_calculated = calculate_metrics(lista_resposta[ndx], list_ground_truth)
-        metric_per_question[target_dataset[ndx]['id']] =  metric_calculated
         # print(f"metric_calculated {metric_calculated}")
+        metric_per_question[target_dataset[ndx]['id']] =  metric_calculated
         exact_match += metric_calculated['EM']
         f1 += metric_calculated['F1']
         exact_match_at_3 += metric_calculated['EM@3']

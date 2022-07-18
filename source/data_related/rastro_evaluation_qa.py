@@ -68,21 +68,36 @@ class EvaluationQa(object):
         'descr_filter':str,
         # números gerais
         'num_question':int,
-        'num_batch_size':int,
         'num_top_k':int,
-        'num_factor_multiply_top_k':int,
         'datetime_execution': str,
         'time_execution_total':int,
         'time_execution_per_question':int,
+        'num_max_answer_length':int,
         # parâmetros (pode crescer)
         # Transfer Learning
-        'num_doc_stride':int,
-        'num_max_answer_length':int,
-        'if_handle_impossible_answer':bool,
+        'num_doc_stride':str,
+        'num_factor_multiply_top_k':str,
+        'if_handle_impossible_answer':str,
         # Context learning
-        'ind_format_prompt':str,
-        'descr_task_prompt':str,
-        'num_shot':int
+        "if_do_sample":str,
+        "val_length_penalty":str,
+        "val_temperature":str,
+        "cod_prompt_format":str,
+        "list_stop_words":str
+    }
+    # Null values are loaded as string
+    # and after converted
+    dtype_evaluation_conversion = {
+        # Transfer Learning
+        'num_doc_stride':float, # to accept null values
+        'if_handle_impossible_answer':bool,
+        'num_factor_multiply_top_k':float,
+        # Context learning
+        "if_do_sample":bool,
+        "val_length_penalty":float,
+        "val_temperature":float,
+        "cod_prompt_format":float, # to accept null values
+        "list_stop_words":str
     }
 
     def __init__(self, parm_evaluation_qa_data:Dict):
@@ -92,13 +107,21 @@ class EvaluationQa(object):
              parm_evaluation_qa_data, 'Esperado', 'Encontrado')
         assert msg_dif == "", f"Estrutura esperada de parm_evaluation_qa_data não corresponde ao esperado {msg_dif}"
 
+        learning_method = parm_evaluation_qa_data['name_learning_method']
         for property_name, property_type in dtype_evaluation_without_code.items():
+            if learning_method== 'transfer':
+                if property_name in ['num_doc_stride','if_handle_impossible_answer','num_factor_multiply_top_k']:
+                    assert isinstance(parm_evaluation_qa_data[property_name], EvaluationQa.dtype_evaluation_conversion[property_name]), f"evaluation_qa.{property_name} must be {EvaluationQa.dtype_evaluation_conversion[property_name]}"
+                    continue
+            if learning_method== 'context':
+                if property_name in ['if_do_sample','val_length_penalty','val_temperature', "cod_prompt_format","list_stop_words"]:
+                    assert isinstance(parm_evaluation_qa_data[property_name], EvaluationQa.dtype_evaluation_conversion[property_name]), f"evaluation_qa.{property_name} must be {EvaluationQa.dtype_evaluation_conversion[property_name]}"
+                    continue
             assert isinstance(parm_evaluation_qa_data[property_name], property_type), f"evaluation_qa.{property_name} must be {property_type}"
 
         assert parm_evaluation_qa_data['name_learning_method'] in ('transfer', 'context'), f"evaluation_qa.name_learning_method must be in ('transfer', 'context'). Found: {parm_evaluation_qa_data['name_learning_method']}"
         assert parm_evaluation_qa_data['ind_language'] in ('en','pt'), f"evaluation_qa.ind_language must be in ('en','pt'). Found: {parm_evaluation_qa_data['ind_language']}"
         assert parm_evaluation_qa_data['name_device'] in ('cpu', 'cuda:0'), f"evaluation_qa.name_device must be in ('cpu', 'cuda:0'). Found: {parm_evaluation_qa_data['name_device']}"
-        assert parm_evaluation_qa_data['ind_format_prompt'] in ('', 'descr','descr_1_n', 'descr_1_1'), f"evaluation_qa.ind_format_prompt must be in ('descr','descr_1_n', 'descr_1_1'). Found: {parm_evaluation_qa_data['ind_format_prompt']}"
 
         self._data = parm_evaluation_qa_data
         self._data['calculated_metric'] = []
@@ -139,7 +162,10 @@ class RastroEvaluationQa(object):
         df_calculated_metric = pd.read_csv('data/tab_calculated_metric.csv', sep = ',',
             header=0,
             dtype= CalculatedMetric.dtype_evaluation,
-            index_col=False)
+            index_col=False,
+            #na_values=['nan', 'NaN'],
+            #keep_default_na=False
+            )
 
         if df_calculated_metric.shape[0]>0:
             for property_name, property_type in CalculatedMetric.dtype_evaluation.items():
@@ -157,7 +183,7 @@ class RastroEvaluationQa(object):
             dtype= EvaluationQa.dtype_evaluation)
 
         if df_evaluation.shape[0]>0:
-            for property_name, property_type in EvaluationQa.dtype_evaluation.items():
+            for property_name, property_type in EvaluationQa.dtype_evaluation_conversion.items():
                 if property_type in (int, float, bool):
                     df_evaluation[property_name] = df_evaluation[property_name].astype(property_type)
         self._df_evaluation = df_evaluation
@@ -242,7 +268,7 @@ def persist_metric_per_question(parm_cod_evaluation, parm_dict_metric_per_questi
         eval_dict['cod_question'] = question_id
         for metric, metric_value in parm_dict_metric_per_question[question_id].items():
             eval_dict['cod_metric'] = metric
-            eval_dict['value'] = metric_value
+            eval_dict['value'] = round(metric_value,4) # 4 decimal places
             #append row to the dataframe
             df_calculated_metric_per_question = df_calculated_metric_per_question.append(eval_dict, ignore_index=True)
 

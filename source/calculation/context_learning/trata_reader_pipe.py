@@ -11,6 +11,7 @@ from transformers import GPT2Tokenizer, GPTJForCausalLM
 # from transformers import GPT2Tokenizer, GPTNeoForCausalLM
 from source.calculation import util_modelo
 from transformers import StoppingCriteria, StoppingCriteriaList
+from source.calculation.context_learning.prompt_format import dict_prompt_format
 
 # import transformers
 # print(f"transformers.__version__ {transformers.__version__}")
@@ -66,24 +67,20 @@ class Reader(): # pylint: disable=missing-class-docstring
 
     _dict_parameters_example = {
                     # parâmetros tarefa
+                    "learning_method": 'context',
                     "num_top_k": 2,
-                    # "num_batch_size": 1,  assumido 1 para answer one question
                     "num_max_answer_length":150,
                     # parâmetros transfer - q&a
                     "num_doc_stride": 0,
                     "num_factor_multiply_top_k": 0,
                     "if_handle_impossible_answer":False,
                     # parâmetros context - text generation
-                    'answer_stop': ['.', '\n', '\n'],
+                    'list_stop_words': ['.', '\n', '!'],
                     "val_length_penalty":2,
-                    'generator_sample': False,
-                    'generator_temperature': 1,
-                    'prompt_format': ('''Instrução: Com base no texto abaixo, responda à pergunta:
-
-    Texto: {context}
-
-    Pergunta: {question}
-    Resposta:''')}
+                    'if_do_sample': False,
+                    'val_temperature': 1,
+                    'cod_prompt_format':1,
+}
 
     def __init__(self,
                  parm_name_model: str,
@@ -100,7 +97,7 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         self.name_device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
         self.device = torch.device(self.name_device)
-        self.num_batch_size = 1 #  parm_dict_config["num_batch_size"]
+
 
 
         self.pipe = pipeline("text-generation", model=self.get_model(self.path_model).to(self.device).eval(),\
@@ -130,30 +127,35 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         self.num_top_k = parm_dict_config["num_top_k"]
         self.num_doc_stride = parm_dict_config["num_doc_stride"]
-        self.prompt_format = parm_dict_config['prompt_format']
+
+        self.cod_prompt_format = int(parm_dict_config['cod_prompt_format'])
+        self.prompt_format = dict_prompt_format[self.cod_prompt_format]['prompt']
         self.if_handle_impossible_answer = parm_dict_config["if_handle_impossible_answer"]
         self.num_max_answer_length = parm_dict_config["num_max_answer_length"]
         self.num_factor_multiply_top_k = parm_dict_config["num_factor_multiply_top_k"]
-        self.if_do_sample = parm_dict_config['generator_sample']
-        self.num_temperature = parm_dict_config['generator_temperature']
-        self.answer_stop = parm_dict_config["answer_stop"]
+        self.if_do_sample = parm_dict_config['if_do_sample']
+        self.val_temperature = parm_dict_config['val_temperature']
+        self.list_stop_words = parm_dict_config["list_stop_words"]
         self.val_length_penalty = parm_dict_config["val_length_penalty"]
 
-        stop_ids = [self.tokenizer.encode(w)[0] for w in self.answer_stop]
+        stop_ids = [self.tokenizer.encode(w)[0] for w in self.list_stop_words]
         self.stop_criteria = KeywordsStoppingCriteria(stop_ids)
 
     @property
     def info(self):
-        return {"name":self.name_model,\
-                "device": self.name_device,\
-                # "top_k": self.num_top_k,\
-                "num_return_sequences": self.num_top_k,\
-                "batch_size": self.num_batch_size,\
-                "length_penalty": self.val_length_penalty, \
-                "doc_stride": self.num_doc_stride,\
-                "factor_multiply_top_k": self.num_factor_multiply_top_k,\
-                "handle_impossible_answer":self.if_handle_impossible_answer,\
-                "max_answer_length":self.num_max_answer_length,\
+        return {"name":self.name_model,
+                "device": self.name_device,
+                "top_k": self.num_top_k,
+                "cod_prompt_format": self.cod_prompt_format,
+                "if_do_sample": self.if_do_sample,
+                "val_temperature": self.val_temperature,
+                "list_stop_words": self.list_stop_words,
+                "val_length_penalty": self.val_length_penalty,
+                "length_penalty": self.val_length_penalty,
+                "doc_stride": self.num_doc_stride,
+                "factor_multiply_top_k": self.num_factor_multiply_top_k,
+                "handle_impossible_answer":self.if_handle_impossible_answer,
+                "max_answer_length":self.num_max_answer_length,
                 "max_seq_len": self.max_seq_len}
 
     @property
@@ -188,17 +190,17 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         assert isinstance(texto_pergunta, str), f"Expected just one question, not {type(texto_pergunta)}"
         assert isinstance(texto_contexto, str), f"Expected just one context, not {type(texto_contexto)}"
-        assert self.num_batch_size == 1, f"self.num_batch_size must be 1 for answer_one_question"
+
+
         prompt = self.prompt_format.replace('{context}', texto_contexto).replace('{question}', texto_pergunta)
 
-
+        # print(f"Prompt: {prompt}")
 
         #print('Tokenizing...')
-        tokenized = self.tokenizer(prompt, return_tensors="pt")
-        prompt_len = len(tokenized.input_ids[0])
-
-        print(f"chars(prompt): {len(prompt)}")
-        print(f"tokens(prompt): {prompt_len}")
+        # tokenized = self.tokenizer(prompt, return_tensors="pt")
+        # prompt_len = len(# .input_ids[0])
+        # print(f"chars(prompt): {len(prompt)}")
+        # print(f"tokens(prompt): {prompt_len}")
 
 
         respostas = self.pipe(prompt,
@@ -213,9 +215,26 @@ class Reader(): # pylint: disable=missing-class-docstring
             num_return_sequences = self.num_top_k,
             num_beams =  self.num_top_k,
             do_sample = self.if_do_sample,
-            temperature = self.num_temperature,
+            temperature = self.val_temperature,
             length_penalty = self.val_length_penalty, # self.num_length_penalty \
             stopping_criteria=StoppingCriteriaList([self.stop_criteria]),
             )
 
-        print(f"texto gerado: {respostas}")
+        if not isinstance(respostas, list):
+            lista_respostas = [respostas]
+        else:
+            lista_respostas = respostas
+
+        if len(lista_respostas) < self.num_top_k:
+            print(f"Warning: #answers=len(lista_respostas)<self.num_top_k {len(lista_respostas)} < {self.num_top_k}. ")
+
+        # renomeando chave de generated_text para texto_resposta
+        for resp in lista_respostas:
+            resp['texto_resposta'] = resp['generated_text']
+            del resp['generated_text']
+
+        #{"texto_resposta":v if k == 'generated_text' else k:v for k,v in respostas.items()}
+
+        # print(f"texto gerado: {lista_respostas}")
+
+        return lista_respostas[:self.num_top_k]

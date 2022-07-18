@@ -84,7 +84,6 @@ class Reader(): # pylint: disable=missing-class-docstring
     _dict_parameters_example = {"num_doc_stride":128,\
                "num_top_k":3, \
                "num_max_answer_length":30, \
-               "num_batch_size":20, \
                "if_handle_impossible_answer":False, \
                "num_factor_multiply_top_k":3}
 
@@ -109,7 +108,6 @@ class Reader(): # pylint: disable=missing-class-docstring
 
 
         # não usado # Automatic Mixed Precision self.use_amp = use_amp
-        self.num_batch_size = parm_dict_config["num_batch_size"]
         self.num_top_k = parm_dict_config["num_top_k"]
         self.num_doc_stride = parm_dict_config["num_doc_stride"]
         self.if_handle_impossible_answer = parm_dict_config["if_handle_impossible_answer"]
@@ -118,7 +116,6 @@ class Reader(): # pylint: disable=missing-class-docstring
 
         self.pipe = pipeline("question-answering", model=self.get_model(self.path_model).to(self.device).eval(),\
                              tokenizer=self.get_tokenizer(self.path_model),\
-                             batch_size=self.num_batch_size,\
                              device=self.device, framework='pt')
         self.max_seq_len = self.pipe.model.config.max_position_embeddings
 
@@ -136,7 +133,6 @@ class Reader(): # pylint: disable=missing-class-docstring
         return {"name":self.name_model,\
                 "device": self.name_device,\
                 "top_k": self.num_top_k,\
-                "batch_size": self.num_batch_size,\
                 "doc_stride": self.num_doc_stride,\
                 "factor_multiply_top_k": self.num_factor_multiply_top_k,\
                 "handle_impossible_answer":self.if_handle_impossible_answer,\
