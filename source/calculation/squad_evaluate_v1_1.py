@@ -1,5 +1,6 @@
 import time
 from typing import Dict
+import torch
 
 from source.calculation.metric.qa_metric import calculate_metrics, calculate_metrics_grouped
 from source.data_related.squad_related import SquadDataset
@@ -111,6 +112,7 @@ def evaluate_learning_method_nested(parm_dataset:SquadDataset, \
                     F1:{round(100.0 * f1 / num_question,2)} \
                     EM@3:{round(100.0 * exact_match_at_3 / num_question,2)} \
                     F1@3:{round(100.0 * f1_at_3 / num_question,2)}")
+                    torch.cuda.empty_cache()
                 if num_question >= num_question_max:
                     break
             if num_question >= num_question_max:
@@ -221,11 +223,13 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
 
 
         if num_question % parm_interval_print == 0:
-            print(f"#{num_question} \
+            print(f"#{num_question} em {time.strftime('%Y-%m-%d %H:%M:%S')} \
             EM:{round(100.0 * exact_match / num_question,2)} \
             F1:{round(100.0 * f1 / num_question,2)} \
             EM@3:{round(100.0 * exact_match_at_3 / num_question,2)} \
             F1@3:{round(100.0 * f1_at_3 / num_question,2)}")
+            torch.cuda.empty_cache()
+
         if num_question >= num_question_max:
             break
 
