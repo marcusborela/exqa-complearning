@@ -69,3 +69,7 @@ dict_config_eval = {}
 evaluate_transfer_method('pt', dict_config_model)
 evaluate_transfer_method('en', dict_config_model)
 
+dict_config_model["num_max_answer_length"] = 160
+evaluate_transfer_method('pt', dict_config_model)
+evaluate_transfer_method('en', dict_config_model)
+

@@ -5,3 +5,7 @@ cod,name_learning_method,ind_language,name_model,name_device,descr_filter,num_qu
 11,transfer,pt,pierreguillou/bert-large-cased-squad-v1.1-portuguese,cuda:0,{},10570,2022-07-13 16:27:28,2577,244,3,10.0,160,128.0,True,True,,,,
 12,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{},10570,2022-07-14 17:49:57,2140,202,3,10.0,40,128.0,True,True,,,,
 13,transfer,pt,pierreguillou/bert-large-cased-squad-v1.1-portuguese,cuda:0,{},10570,2022-07-14 18:27:15,2538,240,3,10.0,40,128.0,True,True,,,,
+14,transfer,pt,pierreguillou/bert-large-cased-squad-v1.1-portuguese,cuda:0,{},10570,2022-07-17 21:54:25,2632,249,3,10.0,80,128.0,True,True,,,,
+15,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{},10570,2022-07-17 22:40:21,2329,220,3,10.0,80,128.0,True,True,,,,
+16,transfer,pt,pierreguillou/bert-large-cased-squad-v1.1-portuguese,cuda:0,{},10570,2022-07-17 23:21:29,2922,276,3,10.0,160,128.0,True,True,,,,
+17,transfer,en,distilbert-base-cased-distilled-squad,cuda:0,{},10570,2022-07-18 00:12:43,2331,221,3,10.0,160,128.0,False,,,,,
