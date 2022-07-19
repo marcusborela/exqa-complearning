@@ -67,6 +67,38 @@ dict_config_eval = {}
 
 sigla_linguagem = 'en'
 name_model = "EleutherAI/gpt-neo-1.3B"
+
+dict_config_model['cod_prompt_format']= 102.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 103.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 104.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+name_model = "EleutherAI/gpt-neo-2.7B"
 dict_config_model['cod_prompt_format']= 101.
 resultado = evaluate_context_method(sigla_linguagem,
             name_model,
@@ -107,6 +139,7 @@ resultado = evaluate_context_method(sigla_linguagem,
             parm_interval_print=50)
 results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
 
+
 name_model = "EleutherAI/gpt-j-6B"
 dict_config_model['cod_prompt_format']= 102.
 resultado = evaluate_context_method(sigla_linguagem,
@@ -138,7 +171,135 @@ resultado = evaluate_context_method(sigla_linguagem,
             parm_interval_print=50)
 results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
 
+
+sigla_linguagem = 'pt'
 name_model = "EleutherAI/gpt-neo-1.3B"
+
+dict_config_model['cod_prompt_format']= 1.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 2.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 3.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 4.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+
+dict_config_model['cod_prompt_format']= 101.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 102.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 103.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 104.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+
+name_model = "EleutherAI/gpt-neo-2.7B"
+dict_config_model['cod_prompt_format']= 101.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 102.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 103.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+dict_config_model['cod_prompt_format']= 104.
+resultado = evaluate_context_method(sigla_linguagem,
+            name_model,
+            dict_config_model,
+            dict_config_eval,
+            parm_if_trace=False,
+            parm_if_record=True,
+            parm_interval_print=50)
+results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
+
+
+name_model = "EleutherAI/gpt-j-6B"
 dict_config_model['cod_prompt_format']= 101.
 resultado = evaluate_context_method(sigla_linguagem,
             name_model,
