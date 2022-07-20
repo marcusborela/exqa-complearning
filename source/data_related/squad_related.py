@@ -22,6 +22,25 @@ class SquadDataset(object):
         # df_dataset = pd.read_json(path_flatten_json_file)
         # self._df = pd.json_normalize(df_dataset['data'])
         self._df = self._dataset.to_pandas()
+        # criar no dataframe:
+        # qtd_char_pergunta
+        self._df['question_len_char'] = self._df['question'].str.len()
+
+        # qtd_char_contexto
+        self._df['context_len_char'] = self._df['context'].str.len()
+
+
+
+        # tipo pergunta
+        question_types = ["What ", "How ", "Is ", "Does ", "Do ", "Was ", "Where ", "Why ", "Which "]
+        self._df["question"].str.startswith(question_type)
+
+        # qtd_char_menor_resposta
+        df_answer = self._df[['id','answer_text']].explode('answer_text')
+        # qtd_char_maior_resposta
+
+        # qtd_ground_truth
+        self._df['qtd_ground_truth'] = self._df['answer_text'].len()
 
     @property
     def nested_json(self):

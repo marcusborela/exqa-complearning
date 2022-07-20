@@ -17,6 +17,15 @@ exemplo2_en_tpp = 'Example:\n\nText: Marcus was born in 1980 and has worked at T
 texto_questao_resposta_pt = 'Texto:{context}\n\nPergunta:{question}\nResposta:'
 texto_questao_resposta_en = 'Text:{context}\n\nQuestion:{question}\nAnswer:'
 
+
+instrucao_pt_sep = '[Instrução]: Com base no texto abaixo, responda de forma sucinta à pergunta, evitando repetir palavras da pergunta:\n###\n'
+instrucao_en_sep = '[Instruction]: Based on the text below, answer the question succinctly, avoiding repeating words from the question:\n###\n'
+exemplo2_pt_tptp_sep = '[Texto]: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\n[Pergunta]: Quem nasceu em 1980?\n[Resposta]: Marcus\n###\n[Texto]: Marcus nasceu em 1980 e trabalha no TCU desde 2005.\n[Pergunta]: Em qual ano Marcus nasceu?\n[Resposta]: 1980\n###\n'
+exemplo2_en_tptp_sep = '[Text]: Marcus was born in 1980 and has worked at TCU since 2005.\n[Question]: Who was born in 1980?\n[Answer]: Marcus\n###\n[Text]: Marcus was born in 1980 and has worked at TCU since 2005.\n[Question]: In which year was Marcus born?\n[Answer]: 1980\n###\n'
+texto_questao_resposta_pt_sep = '[Texto]:{context}\n[Pergunta]:{question}\n[Resposta]:'
+texto_questao_resposta_en_sep = '[Text]:{context}\n[Question]:{question}\n[Answer]:'
+
+
 dict_prompt_format ={
 1: {"prompt": instrucao_pt + texto_questao_resposta_pt, "num_shot":0},
 101: {"prompt": instrucao_en + texto_questao_resposta_en, "num_shot":0},
@@ -26,6 +35,9 @@ dict_prompt_format ={
 103: {"prompt": instrucao_en + exemplo2_en_tptp + texto_questao_resposta_en, "num_shot":2, "format_example": "tptp"},
 4: {"prompt": instrucao_pt + exemplo2_pt_tpp + texto_questao_resposta_pt, "num_shot":2, "format_example": "tpp"},
 104: {"prompt": instrucao_en + exemplo2_en_tpp + texto_questao_resposta_en, "num_shot":2, "format_example": "tpp"},
+203: {"prompt": instrucao_pt_sep + exemplo2_pt_tptp_sep + texto_questao_resposta_pt_sep, "num_shot":2, "format_example": "tptp"},
+303: {"prompt": instrucao_en_sep + exemplo2_en_tptp_sep + texto_questao_resposta_en_sep, "num_shot":2, "format_example": "tptp"},
+
 }
 
 def imprime_prompt_format():
@@ -35,3 +47,5 @@ def imprime_prompt_format():
             print("format_example", body["format_example"])
         print(body['prompt'])
         print('================')
+
+# imprime_prompt_format()
