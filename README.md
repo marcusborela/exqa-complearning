@@ -1,5 +1,6 @@
 # exqa-complearning
-**Extractive Q&amp;A - Performance Comparison between Learning Methods:  Context Learning and Fine-Tuning**
+**Extractive Q&amp;A - Performance Comparison between Learning Methods:  Context and Transfer**
+
 
 **Final Project at Discipline**
 [IA025, Introdução ao Aprendizado Profundo, Turma A](https://www.dac.unicamp.br/portal/caderno-de-horarios/2022/1/S/P/FEEC/IA025)
@@ -13,3 +14,7 @@
 * [Apresentação inicial 23/06/2022 (pdf)](docs/presentations/CompLearningExQA-Presentation-20220623.pdf)
 * [Apresentação 30/06/2022 (pdf)](docs/presentations/CompLearningExQA-Presentation-20220630.pdf)
 * [Apresentação 07/07/2022 (pdf)](docs/presentations/CompLearningExQA-Presentation-20220707.pdf)
+
+
+## Relatório final do projeto
+https://docs.google.com/document/d/175yMLs59uv4IqAm0q6qgd6lO78n_Y4gVUmtjD5gxUc8/edit?usp=sharing
