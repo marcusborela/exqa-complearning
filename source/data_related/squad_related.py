@@ -28,19 +28,20 @@ class SquadDataset(object):
 
         # qtd_char_contexto
         self._df['context_len_char'] = self._df['context'].str.len()
+        self._df['question_context_len_char'] = self._df['context_len_char'] + self._df['question_len_char']
 
 
 
         # tipo pergunta
-        question_types = ["What ", "How ", "Is ", "Does ", "Do ", "Was ", "Where ", "Why ", "Which "]
-        self._df["question"].str.startswith(question_type)
+        # question_types = ["What ", "How ", "Is ", "Does ", "Do ", "Was ", "Where ", "Why ", "Which "]
+        # self._df["question"].str.startswith(question_type)
 
         # qtd_char_menor_resposta
-        df_answer = self._df[['id','answer_text']].explode('answer_text')
+        # df_answer = self._df[['id','answer_text']].explode('answer_text')
         # qtd_char_maior_resposta
 
         # qtd_ground_truth
-        self._df['qtd_ground_truth'] = self._df['answer_text'].len()
+        # self._df['qtd_ground_truth'] = self._df['answer_text'].len()
 
     @property
     def nested_json(self):

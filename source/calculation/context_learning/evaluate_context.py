@@ -90,7 +90,7 @@ resultado = evaluate_context_method(sigla_linguagem,
             parm_interval_print=50)
 results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
 
-name_model = "EleutherAI/gpt-neo-1.3B"
+
 dict_config_model['cod_prompt_format']= 101.
 resultado = evaluate_context_method(sigla_linguagem,
             name_model,
