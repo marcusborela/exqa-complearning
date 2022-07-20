@@ -200,7 +200,29 @@ class RastroEvaluationQa(object):
         self._df_evaluation = df_evaluation
         self._last_code = df_evaluation.iloc[-1]['cod']
 
+        self._df_eval_metric_line = pd.merge(left=self._df_evaluation, right=self._df_calculated_metric , left_on='cod', right_on='cod_evaluation', how='left')
 
+        df_pivoted_metric = self._df_calculated_metric.pivot(index='cod_evaluation', columns='cod_metric', values='value')
+
+        self._df_eval_metric_col = pd.merge(left=self._df_evaluation, right=df_pivoted_metric , left_on='cod', right_on='cod_evaluation', how='left')
+
+
+
+    @property
+    def df_evaluation (self):
+        return self._df_evaluation
+
+    @property
+    def df_calculated_metric (self):
+        return self._df_calculated_metric
+
+    @property
+    def df_eval_metric_line (self):
+        return self._df_eval_metric_line
+
+    @property
+    def df_eval_metric_col (self):
+        return self._df_eval_metric_col
 
     @property
     def last_code(self):
@@ -231,15 +253,6 @@ class RastroEvaluationQa(object):
         print(f"count: \n{self.count}")
         print(f"df_evaluation: \n{self.df_evaluation}")
         print(f"df_calculated_metric: \n{self._df_calculated_metric}")
-
-
-    @property
-    def df_calculated_metric(self):
-        return self._df_calculated_metric
-
-    @property
-    def df_evaluation(self):
-        return self._df_evaluation
 
 def persist_evaluation(parm_list_evaluation:List[EvaluationQa], parm_if_print:bool=False):
     rastro_eval_qa = RastroEvaluationQa()
