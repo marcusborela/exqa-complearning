@@ -87,29 +87,42 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
     #    assert parm_dict_config_model['cod_prompt_format'] < 100, f"Para inglês, deve-se usar cod_prompt_format < 100"
 
     target_dataset = parm_dataset.dataset
+
+    if parm_dict_config_eval and isinstance(parm_dict_config_eval, dict) and 'list_index' in parm_dict_config_eval:
+        target_dataset = target_dataset.select(indices=parm_dict_config_eval['list_index'])
+
     if parm_dict_config_eval is not None and isinstance(parm_dict_config_eval, dict) and 'num_question_max' in parm_dict_config_eval:
         target_dataset = target_dataset.select(range(parm_dict_config_eval['num_question_max']))
+        num_question_max = parm_dict_config_eval['num_question_max']
+    else:
+        num_question_max = 999999999
 
     num_question = 0
     # print(f"Evalating in dataset {parm_dataset.name} model \n{parm_reader.info} ")
 
 
 
-    if parm_dict_config_eval and isinstance(parm_dict_config_eval, dict) and 'num_question_max' in parm_dict_config_eval:
-        num_question_max = parm_dict_config_eval['num_question_max']
-    else:
-        num_question_max = 999999999
 
     metric_per_question = {}
 
     num_question = 0
     f1_at_3 = f1 = exact_match = exact_match_at_3 =  0.
     tstart = time.time()
-    for qa in target_dataset:
+    for ndx, qa in enumerate(target_dataset):
+        print(ndx)
         num_question += 1
         # calcular resposta
-        resposta = parm_reader.answer_one_question(texto_contexto=qa['context'],\
+        try:
+            resposta = parm_reader.answer_one_question(texto_contexto=qa['context'],\
                                 texto_pergunta=qa['question'])
+        except Exception as e:
+            if 'out of memory' in str(e):
+                print(f"ndx {ndx} error gpu out of memory")
+                GPUs = GPUtil.getGPUs()
+                gpu = GPUs[0]
+                print(f"GPU Used: {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
+                continue
+
         # print(f"resposta {resposta}")
         list_ground_truth = qa['answer_text']
         metric_calculated = calculate_metrics(resposta, list_ground_truth)
@@ -126,6 +139,7 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
             print(f"Métrica: {metric_calculated}")
 
 
+
         if num_question % parm_interval_print == 0:
             print(f"#{num_question} em {time.strftime('%Y-%m-%d %H:%M:%S')} \
             EM:{round(100.0 * exact_match / num_question,2)} \
@@ -134,13 +148,12 @@ def evaluate_learning_method_one_by_one_dataset(parm_dataset:SquadDataset, \
             F1@3:{round(100.0 * f1_at_3 / num_question,2)}")
             GPUs = GPUtil.getGPUs()
             gpu = GPUs[0]
-            print(f"Antes empty_cache GPU Used: {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
-            torch.cuda.empty_cache()
-            if (gpu.memoryUtil*100) > 75:
-                time.sleep(1)
-            GPUs = GPUtil.getGPUs()
-            gpu = GPUs[0]
-            print(f"Após empty_cache GPU Used:  {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
+            if (gpu.memoryUtil*100) > 90:
+                print(f"Antes empty_cache GPU Used: {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
+                torch.cuda.empty_cache()
+                GPUs = GPUtil.getGPUs()
+                gpu = GPUs[0]
+                print(f"ndx: {ndx} Após empty_cache GPU Used:  {gpu.memoryUsed :.0f}MB | Util {gpu.memoryUtil*100:3.0f}% | RAM Free: {gpu.memoryFree :.0f}MB | Total {gpu.memoryTotal:.0f}MB")
 
         if num_question >= num_question_max:
             break

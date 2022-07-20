@@ -54,54 +54,18 @@ dict_config_model = {
                 "num_factor_multiply_top_k": '',
                 "if_handle_impossible_answer": '',
                 # parâmetros context
-                'list_stop_words': ['.', '\n','!', '###'],
+                'list_stop_words': ['.', '\n','!'],
                 'if_do_sample': False,
                 "val_length_penalty":0.,
                 'val_temperature': 0.1,
 }
 
+#lista = [i for i in range(4265, 4300)]
+#dict_config_eval = {"list_index": lista}
+
 results = []
 # dict_config_eval = {"num_question_max": 8}
 dict_config_eval = {}
-
-name_model = "EleutherAI/gpt-j-6B"
-sigla_linguagem = 'en'
-dict_config_model['cod_prompt_format']= 303.
-resultado = evaluate_context_method(sigla_linguagem,
-            name_model,
-            dict_config_model,
-            dict_config_eval,
-            parm_if_trace=False,
-            parm_if_record=True,
-            parm_interval_print=50)
-results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
-
-dict_config_model['list_stop_words'] = ['.', '\n','!']
-
-name_model = "EleutherAI/gpt-neo-1.3B"
-sigla_linguagem = 'pt'
-dict_config_model['cod_prompt_format']= 103.
-resultado = evaluate_context_method(sigla_linguagem,
-            name_model,
-            dict_config_model,
-            dict_config_eval,
-            parm_if_trace=False,
-            parm_if_record=True,
-            parm_interval_print=50)
-results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
-
-
-dict_config_model['cod_prompt_format']= 101.
-resultado = evaluate_context_method(sigla_linguagem,
-            name_model,
-            dict_config_model,
-            dict_config_eval,
-            parm_if_trace=False,
-            parm_if_record=True,
-            parm_interval_print=50)
-results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
-
-
 sigla_linguagem = 'pt'
 name_model = "EleutherAI/gpt-j-6B"
 dict_config_model['list_stop_words'] = ['.', '\n','!', '###']
@@ -115,9 +79,9 @@ resultado = evaluate_context_method(sigla_linguagem,
             parm_interval_print=50)
 results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
 
+
 dict_config_model['list_stop_words'] = ['.', '\n','!']
-name_model = "EleutherAI/gpt-neo-1.3B"
-dict_config_model['cod_prompt_format']= 102.
+dict_config_model['cod_prompt_format']= 103.
 resultado = evaluate_context_method(sigla_linguagem,
             name_model,
             dict_config_model,
@@ -128,7 +92,7 @@ resultado = evaluate_context_method(sigla_linguagem,
 results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
 
 
-dict_config_model['cod_prompt_format']= 104.
+dict_config_model['cod_prompt_format']= 3.
 resultado = evaluate_context_method(sigla_linguagem,
             name_model,
             dict_config_model,

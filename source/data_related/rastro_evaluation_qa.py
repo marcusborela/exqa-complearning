@@ -254,6 +254,7 @@ class RastroEvaluationQa(object):
         print(f"df_evaluation: \n{self.df_evaluation}")
         print(f"df_calculated_metric: \n{self._df_calculated_metric}")
 
+
 def persist_evaluation(parm_list_evaluation:List[EvaluationQa], parm_if_print:bool=False):
     rastro_eval_qa = RastroEvaluationQa()
     for evaluation in parm_list_evaluation:
@@ -297,3 +298,4 @@ def persist_metric_per_question(parm_cod_evaluation, parm_dict_metric_per_questi
             df_calculated_metric_per_question = df_calculated_metric_per_question.append(eval_dict, ignore_index=True)
 
     df_calculated_metric_per_question.to_csv('data/tab_calculated_metric_per_question.csv', sep = ',', index=False)
+

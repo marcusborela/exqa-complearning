@@ -29,19 +29,16 @@ class SquadDataset(object):
         # qtd_char_contexto
         self._df['context_len_char'] = self._df['context'].str.len()
         self._df['question_context_len_char'] = self._df['context_len_char'] + self._df['question_len_char']
+        self._df['question_type'] = [define_question_type(pergunta) for pergunta in self._df['question'].values.tolist()]
 
 
 
-        # tipo pergunta
-        # question_types = ["What ", "How ", "Is ", "Does ", "Do ", "Was ", "Where ", "Why ", "Which "]
-        # self._df["question"].str.startswith(question_type)
-
-        # qtd_char_menor_resposta
-        # df_answer = self._df[['id','answer_text']].explode('answer_text')
-        # qtd_char_maior_resposta
-
-        # qtd_ground_truth
-        # self._df['qtd_ground_truth'] = self._df['answer_text'].len()
+        df_answer = self._df[['id','answer_text']].explode('answer_text')
+        df_answer['answer_text_len_char'] = df_answer['answer_text'].str.len()
+        df_result = df_answer.groupby('id').agg({'answer_text_len_char': ['mean', 'min', 'max', 'count']})
+        df_result.columns = ["answer_mean_length", "answer_min_length",	"answer_max_length", "answer_count"]
+        df_result.reset_index(inplace=True)
+        self._df = pd.merge(left=self._df, right=df_result , left_on='id', right_on='id', how='left')
 
     @property
     def nested_json(self):
@@ -340,3 +337,40 @@ def _correct_and_save_dataset_without_duplication(parm_dataset:SquadDataset, par
     dict_json['data']=parm_dataset.nested_json
     with open(path_dataset_file,'w', encoding='utf-8') as dataset_file:
         json.dump(dict_json, dataset_file)
+
+
+def define_question_type(line):
+    line = line.lower()
+    list_words = line.split()
+    first_word = list_words[0]
+    first_2_word = list_words[0] + ' ' + list_words[1]
+    type_question = 'unknown'
+    if first_2_word in question_types_2_words:
+        type_question = first_2_word
+    elif first_word in question_types:
+            type_question = first_word
+    if type_question == 'unknown':
+        for type_question_punct in question_types_2_words_punctuation:
+            if type_question_punct in line:
+                type_question = question_types_2_words_punctuation[type_question_punct]
+                break
+    if type_question == 'unknown':
+        for type_question_punct in question_types_punctuation:
+            if type_question_punct in line:
+                type_question = question_types_punctuation[type_question_punct]
+                break
+    return type_question
+
+def add_punctuation_before_word_in_list(list_word):
+    new_dict = {}
+    for word in list_word:
+        new_dict[', ' + word] = word
+        new_dict[',' + word] = word
+        new_dict['.' + word] = word
+        new_dict['. ' + word] = word
+    return new_dict
+
+question_types = ["are", "did", "does", "do", "is", "how", "since",  "was", "were", "what", "when", "where", "who", "which", "why" ]
+question_types_2_words = ["are there", "is there" ]
+question_types_punctuation = add_punctuation_before_word_in_list(question_types)
+question_types_2_words_punctuation = add_punctuation_before_word_in_list(question_types_2_words)
