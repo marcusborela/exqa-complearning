@@ -22,3 +22,4 @@ cod,name_learning_method,ind_language,name_model,name_device,descr_filter,num_qu
 34,context,en,EleutherAI/gpt-j-6B,cuda:0,{},10570,2022-07-19 23:15:19,6062,573,3,,80,,,0.0,0.0,0.1,303.0,"['.', '\n', '!', '###']"
 35,context,pt,EleutherAI/gpt-neo-1.3B,cuda:0,{},10570,2022-07-20 01:01:51,7709,729,3,,80,,,0.0,0.0,0.1,103.0,"['.', '\n', '!']"
 36,context,pt,EleutherAI/gpt-neo-1.3B,cuda:0,{},10570,2022-07-20 03:16:11,8757,828,3,,80,,,0.0,0.0,0.1,101.0,"['.', '\n', '!']"
+37,context,pt,EleutherAI/gpt-j-6B,cuda:0,{},10570,2022-07-20 08:20:59,14365,1359,3,,80,,,0.0,0.0,0.1,203.0,"['.', '\n', '!', '###']"
