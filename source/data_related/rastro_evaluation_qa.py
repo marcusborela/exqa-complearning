@@ -1,9 +1,11 @@
 import copy
 import pandas as pd
-import numpy as np
+import math
 from typing import  List
 from typing import Dict
 from source.calculation import util_modelo
+from source.data_related import squad_related
+from source.calculation.context_learning import prompt_format
 
 class CalculatedMetric(object):
     """
@@ -202,9 +204,33 @@ class RastroEvaluationQa(object):
 
         self._df_eval_metric_line = pd.merge(left=self._df_evaluation, right=self._df_calculated_metric , left_on='cod', right_on='cod_evaluation', how='left')
 
+        remove_columns = ['descr_filter', # values not important for analyses
+         'datetime_execution',
+         'num_top_k',
+         'name_device',
+         'num_question',
+         'num_doc_stride',
+         'num_factor_multiply_top_k',
+         'if_handle_impossible_answer',
+         'if_do_sample',
+         'val_length_penalty',
+         'val_temperature','list_stop_words']
+
+        self._df_eval_metric_line.drop(columns=remove_columns, axis=1, inplace=True)
+
+        # adding info about num_shot
+        self._df_eval_metric_line['num_shot'] = [define_num_shot(pergunta) for pergunta in self._df_eval_metric_line['cod_prompt_format'].values.tolist()]
+        self._df_eval_metric_line['ind_format_example'] = [define_format_example(pergunta) for pergunta in self._df_eval_metric_line['cod_prompt_format'].values.tolist()]
+
         df_pivoted_metric = self._df_calculated_metric.pivot(index='cod_evaluation', columns='cod_metric', values='value')
 
         self._df_eval_metric_col = pd.merge(left=self._df_evaluation, right=df_pivoted_metric , left_on='cod', right_on='cod_evaluation', how='left')
+        self._df_eval_metric_col.drop(columns=remove_columns, axis=1, inplace=True)
+
+        # adding info about prompt
+        self._df_eval_metric_col['num_shot'] = [define_num_shot(pergunta) for pergunta in self._df_eval_metric_col['cod_prompt_format'].values.tolist()]
+        self._df_eval_metric_col['ind_format_example'] = [define_format_example(pergunta) for pergunta in self._df_eval_metric_col['cod_prompt_format'].values.tolist()]
+        self._df_eval_metric_col['ind_language_prompt'] = [define_language_prompt(pergunta) for pergunta in self._df_eval_metric_col['cod_prompt_format'].values.tolist()]
 
 
 
@@ -264,17 +290,34 @@ def persist_evaluation(parm_list_evaluation:List[EvaluationQa], parm_if_print:bo
         rastro_eval_qa.imprime()
     return rastro_eval_qa._last_code  # último código gerado
 
-dtype_calculated_metric_per_question = {
-    'cod_evaluation':int,
-    'cod_question':str,
-    'cod_metric':str,
-    'value':float,
-}
+
+def define_num_shot(cod_prompt_format):
+    if  not math.isnan(cod_prompt_format):
+        if int(cod_prompt_format) in  prompt_format.dict_prompt_format:
+            return int(prompt_format.dict_prompt_format[int(cod_prompt_format)]['num_shot'])
+    else:
+        return None
+def define_format_example(cod_prompt_format):
+    if  not math.isnan(cod_prompt_format):
+        if int(cod_prompt_format) in  prompt_format.dict_prompt_format:
+            if 'format_example' in prompt_format.dict_prompt_format[int(cod_prompt_format)]:
+                return prompt_format.dict_prompt_format[int(cod_prompt_format)]['format_example']
+    else:
+        return None
+
+def define_language_prompt(cod_prompt_format):
+    if  not math.isnan(cod_prompt_format):
+        if int(cod_prompt_format) in  prompt_format.dict_prompt_format:
+            return prompt_format.dict_prompt_format[int(cod_prompt_format)]['ind_language']
+    else:
+        return None
+
 
 def persist_metric_per_question(parm_cod_evaluation, parm_dict_metric_per_question:Dict):
     """
     Expects a dict with:
-        id_question: {} {'EM':xxxx, 'F1':xxxx, 'EM@3':xxxx, 'F1@3':xxxx}
+        id_question: {} {'EM':xxxx,
+         'F1':xxxx, 'EM@3':xxxx, 'F1@3':xxxx}
     """
     # Reads data from tab_calculated_metric_per_question.csv in dataframe
     df_calculated_metric_per_question = pd.read_csv('data/tab_calculated_metric_per_question.csv', sep = ',',
@@ -299,3 +342,63 @@ def persist_metric_per_question(parm_cod_evaluation, parm_dict_metric_per_questi
 
     df_calculated_metric_per_question.to_csv('data/tab_calculated_metric_per_question.csv', sep = ',', index=False)
 
+
+def load_metric_per_question():
+    # Reads data from tab_calculated_metric_per_question.csv in dataframe
+    df_calculated_metric_per_question = pd.read_csv('data/tab_calculated_metric_per_question.csv', sep = ',',
+        header=0,
+        dtype= dtype_calculated_metric_per_question,
+        index_col=False)
+
+    if df_calculated_metric_per_question.shape[0]>0:
+        for property_name, property_type in dtype_calculated_metric_per_question.items():
+            if property_type in (int, float, bool):
+                df_calculated_metric_per_question[property_name] = df_calculated_metric_per_question[property_name].astype(property_type)
+
+    # Prepare dataframe for analysis with squad information and eval information
+
+    # Integrating eval information
+
+    rastro_eval_qa = RastroEvaluationQa()
+
+    df_metric_question_squad = pd.merge(left=df_calculated_metric_per_question,
+             right=rastro_eval_qa.df_eval_metric_line,
+             left_on=['cod_evaluation', 'cod_metric'],
+             right_on=['cod', 'cod_metric'],
+             how='left', suffixes=['_all', '_question'])
+
+    df_metric_question_squad.drop(columns=['cod_evaluation_question'],axis=1, inplace=True)
+    df_metric_question_squad = df_metric_question_squad.rename(columns={'cod_evaluation_all': 'cod_evaluation'})
+    # Integrating squad information
+    squad_dataset_en = squad_related.load_squad_dataset_1_1(parm_language='en')
+    squad_dataset_pt = squad_related.load_squad_dataset_1_1(parm_language='pt')
+
+    squad_columns_remove = ['title','context','question','answer_start','answer_text']
+
+    df_squad_en = squad_dataset_en.df
+    df_squad_en['ind_language'] = 'en'
+    df_squad_en.drop(columns=squad_columns_remove, axis=1, inplace=True)
+
+    df_squad_pt = squad_dataset_pt.df
+    df_squad_pt['ind_language'] = 'pt'
+    df_squad_pt.drop(columns=squad_columns_remove, axis=1, inplace=True)
+
+    df_metric_question_squad_pt = pd.merge(left=df_squad_pt, right=df_metric_question_squad , left_on=['id','ind_language'],  right_on=['cod_question', 'ind_language'], how='left')
+    df_metric_question_squad_en = pd.merge(left=df_squad_en, right=df_metric_question_squad , left_on=['id','ind_language'],  right_on=['cod_question', 'ind_language'], how='left')
+
+    df_metric_question_squad = pd.concat([df_metric_question_squad_pt, df_metric_question_squad_en], ignore_index=True)
+
+
+    # adding info about num_shot
+    df_metric_question_squad['num_shot'] = [define_num_shot(pergunta) for pergunta in df_metric_question_squad['cod_prompt_format'].values.tolist()]
+    df_metric_question_squad['ind_format_example'] = [define_format_example(pergunta) for pergunta in df_metric_question_squad['cod_prompt_format'].values.tolist()]
+    df_metric_question_squad['ind_language_prompt'] = [define_language_prompt(pergunta) for pergunta in df_metric_question_squad['cod_prompt_format'].values.tolist()]
+
+    return df_calculated_metric_per_question, df_metric_question_squad
+
+dtype_calculated_metric_per_question = {
+    'cod_evaluation':int,
+    'cod_question':str,
+    'cod_metric':str,
+    'value':float,
+}

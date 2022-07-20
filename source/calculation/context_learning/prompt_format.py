@@ -27,16 +27,16 @@ texto_questao_resposta_en_sep = '[Text]:{context}\n[Question]:{question}\n[Answe
 
 
 dict_prompt_format ={
-1: {"prompt": instrucao_pt + texto_questao_resposta_pt, "num_shot":0},
-101: {"prompt": instrucao_en + texto_questao_resposta_en, "num_shot":0},
-2: {"prompt": instrucao_pt + exemplo1_pt + texto_questao_resposta_pt, "num_shot":1},
-102: {"prompt": instrucao_en + exemplo1_en + texto_questao_resposta_en, "num_shot":1},
-3: {"prompt": instrucao_pt + exemplo2_pt_tptp + texto_questao_resposta_pt, "num_shot":2, "format_example": "tptp"},
-103: {"prompt": instrucao_en + exemplo2_en_tptp + texto_questao_resposta_en, "num_shot":2, "format_example": "tptp"},
-4: {"prompt": instrucao_pt + exemplo2_pt_tpp + texto_questao_resposta_pt, "num_shot":2, "format_example": "tpp"},
-104: {"prompt": instrucao_en + exemplo2_en_tpp + texto_questao_resposta_en, "num_shot":2, "format_example": "tpp"},
-203: {"prompt": instrucao_pt_sep + exemplo2_pt_tptp_sep + texto_questao_resposta_pt_sep, "num_shot":2, "format_example": "tptp"},
-303: {"prompt": instrucao_en_sep + exemplo2_en_tptp_sep + texto_questao_resposta_en_sep, "num_shot":2, "format_example": "tptp"},
+1: {"prompt": instrucao_pt + texto_questao_resposta_pt, "num_shot":0, "ind_language":'pt'},
+101: {"prompt": instrucao_en + texto_questao_resposta_en, "num_shot":0,"ind_language":'en'},
+2: {"prompt": instrucao_pt + exemplo1_pt + texto_questao_resposta_pt, "num_shot":1,"ind_language":'pt'},
+102: {"prompt": instrucao_en + exemplo1_en + texto_questao_resposta_en, "num_shot":1,"ind_language":'en'},
+3: {"prompt": instrucao_pt + exemplo2_pt_tptp + texto_questao_resposta_pt, "num_shot":2, "format_example": "tptp","ind_language":'pt'},
+103: {"prompt": instrucao_en + exemplo2_en_tptp + texto_questao_resposta_en, "num_shot":2, "format_example": "tptp","ind_language":'en'},
+4: {"prompt": instrucao_pt + exemplo2_pt_tpp + texto_questao_resposta_pt, "num_shot":2, "format_example": "tpp","ind_language":'pt'},
+104: {"prompt": instrucao_en + exemplo2_en_tpp + texto_questao_resposta_en, "num_shot":2, "format_example": "tpp","ind_language":'en'},
+203: {"prompt": instrucao_pt_sep + exemplo2_pt_tptp_sep + texto_questao_resposta_pt_sep, "num_shot":2, "format_example": "tptp","ind_language":'en'},
+303: {"prompt": instrucao_en_sep + exemplo2_en_tptp_sep + texto_questao_resposta_en_sep, "num_shot":2, "format_example": "tptp","ind_language":'en'},
 
 }
 
