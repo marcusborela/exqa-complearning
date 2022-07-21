@@ -7,9 +7,11 @@ sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath(r'.\.'))
 from source.data_related import squad_related
 
-squad_dataset = squad_related.load_squad_dataset_1_1(parm_language='en')
+# squad_dataset = squad_related.load_squad_dataset_1_1(parm_language='en')
 
+from source.calculation.context_learning import prompt_format
 
+prompt_format.imprime_prompt_format()
 
 """
 

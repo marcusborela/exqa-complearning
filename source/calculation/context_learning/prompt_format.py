@@ -37,7 +37,6 @@ dict_prompt_format ={
 104: {"prompt": instrucao_en + exemplo2_en_tpp + texto_questao_resposta_en, "num_shot":2, "format_example": "tpp","ind_language":'en'},
 203: {"prompt": instrucao_pt_sep + exemplo2_pt_tptp_sep + texto_questao_resposta_pt_sep, "num_shot":2, "format_example": "tptp","ind_language":'en'},
 303: {"prompt": instrucao_en_sep + exemplo2_en_tptp_sep + texto_questao_resposta_en_sep, "num_shot":2, "format_example": "tptp","ind_language":'en'},
-
 }
 
 def imprime_prompt_format():

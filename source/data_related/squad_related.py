@@ -4,10 +4,14 @@
 
 """
 import json
+import pickle
 from datasets import load_dataset
 import pandas as pd
 import matplotlib.pyplot as plt
 from source.calculation import util_modelo
+
+from transformers import GPT2Tokenizer
+
 
 PATH_DATASET = '/home/borela/fontes/exqa-complearning/data/dataset/squad/'
 
@@ -32,13 +36,28 @@ class SquadDataset(object):
         self._df['question_type'] = [define_question_type(pergunta) for pergunta in self._df['question'].values.tolist()]
 
 
-
         df_answer = self._df[['id','answer_text']].explode('answer_text')
         df_answer['answer_text_len_char'] = df_answer['answer_text'].str.len()
-        df_result = df_answer.groupby('id').agg({'answer_text_len_char': ['mean', 'min', 'max', 'count']})
-        df_result.columns = ["answer_mean_length", "answer_min_length",	"answer_max_length", "answer_count"]
+
+
+        df_answer['answer_text_len_token_gptneo13'] = [define_num_tokens(resp,tok_gptneo13) for resp in df_answer['answer_text'].values.tolist()]
+        df_answer['answer_text_len_token_gptneo27'] = [define_num_tokens(resp,tok_gptneo27) for resp in df_answer['answer_text'].values.tolist()]
+        df_answer['answer_text_len_token_gptj'] = [define_num_tokens(resp, tok_gptj) for resp in df_answer['answer_text'].values.tolist()]
+
+        df_result = df_answer.groupby('id').agg({'answer_text_len_char': ['mean', 'min', 'max', 'count'],
+                'answer_text_len_token_gptneo13':['mean', 'min', 'max'],'answer_text_len_token_gptneo27':['mean', 'min', 'max'],
+                'answer_text_len_token_gptj':['mean', 'min', 'max']})
+        df_result.columns = ["answer_mean_length", "answer_min_length",	"answer_max_length", "answer_count",
+                             "answer_mean_qtd_token_gptneo13", "answer_min_qtd_token_gptneo13",	"answer_max_qtd_token_gptneo13",
+                             "answer_mean_qtd_token_gptneo27", "answer_min_qtd_token_gptneo27",	"answer_max_qtd_token_gptneo27",
+                             "answer_mean_qtd_token_gptj", "answer_min_qtd_token_gptj",	"answer_max_qtd_token_gptj"]
         df_result.reset_index(inplace=True)
         self._df = pd.merge(left=self._df, right=df_result , left_on='id', right_on='id', how='left')
+
+        with open('source/data_related/set_id_pergunta_min_tok_2.pickle', 'rb') as handle:
+            set_id_pergunta_exc = pickle.load(handle)
+
+        self._df_exc = self._df[~self._df['id'].isin(set_id_pergunta_exc)]
 
     @property
     def nested_json(self):
@@ -67,6 +86,10 @@ class SquadDataset(object):
     @property
     def df(self):
         return self._df
+
+    @property
+    def df_exc(self):
+        return self._df_exc
 
     def print_total_per_question_type(self):
         counts = {}
@@ -169,6 +192,32 @@ class SquadDataset(object):
         plt.legend()
         plt.ylabel("Token count")
         plt.show()
+
+def define_id_question_exclude():
+    squad_dataset_en = load_squad_dataset_1_1(parm_language='en')
+    squad_dataset_pt = load_squad_dataset_1_1(parm_language='pt')
+    set_id_pergunta_retirar_en = set(squad_dataset_en.df.query('answer_min_qtd_token_gptneo13<=2 or answer_min_qtd_token_gptneo27<=2 or answer_min_qtd_token_gptj<=2')['id'].tolist())
+    set_id_pergunta_retirar_pt = set(squad_dataset_pt.df.query('answer_min_qtd_token_gptneo13<=2 or answer_min_qtd_token_gptneo27<=2 or answer_min_qtd_token_gptj<=2')['id'].tolist())
+    set_id_pergunta_min_tok_2=set_id_pergunta_retirar_pt.union(set_id_pergunta_retirar_en)
+    with open('source/data_related/set_id_pergunta_min_tok_2.pickle', 'wb') as handle:
+        pickle.dump(set_id_pergunta_min_tok_2, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+
+def get_tokenizer(name_model: str,
+                    *args, batch_size: int = 128, **kwargs) -> GPT2Tokenizer:
+    path_model = "models/context_learning/"+name_model
+    return GPT2Tokenizer.from_pretrained(path_model, use_fast=False, *args, **kwargs)
+
+
+tok_gptneo13 = get_tokenizer("EleutherAI/gpt-neo-1.3B")
+tok_gptneo27 = get_tokenizer("EleutherAI/gpt-neo-2.7B")
+tok_gptj = get_tokenizer("EleutherAI/gpt-j-6B")
+
+
+def define_num_tokens(line:str, parm_tokenizer):
+    inputs = parm_tokenizer(line)
+    return len(inputs["input_ids"])
 
 
 def evaluate_dataset_squad_1_1(parm_dataset:SquadDataset, parm_lista_pergunta_imprimir=None):

@@ -365,7 +365,7 @@ def load_metric_per_question():
              right=rastro_eval_qa.df_eval_metric_line,
              left_on=['cod_evaluation', 'cod_metric'],
              right_on=['cod', 'cod_metric'],
-             how='left', suffixes=['_all', '_question'])
+             how='left', suffixes=['_question', '_all'])
 
     df_metric_question_squad.drop(columns=['cod_evaluation_question'],axis=1, inplace=True)
     df_metric_question_squad = df_metric_question_squad.rename(columns={'cod_evaluation_all': 'cod_evaluation'})
@@ -383,6 +383,7 @@ def load_metric_per_question():
     df_squad_pt['ind_language'] = 'pt'
     df_squad_pt.drop(columns=squad_columns_remove, axis=1, inplace=True)
 
+
     df_metric_question_squad_pt = pd.merge(left=df_squad_pt, right=df_metric_question_squad , left_on=['id','ind_language'],  right_on=['cod_question', 'ind_language'], how='left')
     df_metric_question_squad_en = pd.merge(left=df_squad_en, right=df_metric_question_squad , left_on=['id','ind_language'],  right_on=['cod_question', 'ind_language'], how='left')
 
@@ -394,7 +395,30 @@ def load_metric_per_question():
     df_metric_question_squad['ind_format_example'] = [define_format_example(pergunta) for pergunta in df_metric_question_squad['cod_prompt_format'].values.tolist()]
     df_metric_question_squad['ind_language_prompt'] = [define_language_prompt(pergunta) for pergunta in df_metric_question_squad['cod_prompt_format'].values.tolist()]
 
-    return df_calculated_metric_per_question, df_metric_question_squad
+
+    df_squad_en_exc = squad_dataset_en.df_exc
+    df_squad_en_exc['ind_language'] = 'en'
+    df_squad_en_exc.drop(columns=squad_columns_remove, axis=1, inplace=True)
+
+    df_squad_pt_exc = squad_dataset_pt.df_exc
+    df_squad_pt_exc['ind_language'] = 'pt'
+    df_squad_pt_exc.drop(columns=squad_columns_remove, axis=1, inplace=True)
+
+
+    df_metric_question_squad_pt_exc = pd.merge(left=df_squad_pt_exc, right=df_metric_question_squad , left_on=['id','ind_language'],  right_on=['cod_question', 'ind_language'], how='left')
+    df_metric_question_squad_en_exc = pd.merge(left=df_squad_en_exc, right=df_metric_question_squad , left_on=['id','ind_language'],  right_on=['cod_question', 'ind_language'], how='left')
+    df_metric_question_squad_exc = pd.concat([df_metric_question_squad_pt_exc, df_metric_question_squad_en_exc], ignore_index=True)
+
+
+    # adding info about num_shot
+    df_metric_question_squad_exc['num_shot'] = [define_num_shot(pergunta) for pergunta in df_metric_question_squad_exc['cod_prompt_format'].values.tolist()]
+    df_metric_question_squad_exc['ind_format_example'] = [define_format_example(pergunta) for pergunta in df_metric_question_squad_exc['cod_prompt_format'].values.tolist()]
+    df_metric_question_squad_exc['ind_language_prompt'] = [define_language_prompt(pergunta) for pergunta in df_metric_question_squad_exc['cod_prompt_format'].values.tolist()]
+
+
+
+
+    return df_calculated_metric_per_question, df_metric_question_squad, df_metric_question_squad_exc
 
 dtype_calculated_metric_per_question = {
     'cod_evaluation':int,

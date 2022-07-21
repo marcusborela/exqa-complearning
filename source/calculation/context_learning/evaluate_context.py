@@ -66,33 +66,10 @@ dict_config_model = {
 results = []
 # dict_config_eval = {"num_question_max": 8}
 dict_config_eval = {}
-sigla_linguagem = 'pt'
-name_model = "EleutherAI/gpt-j-6B"
-dict_config_model['list_stop_words'] = ['.', '\n','!', '###']
-dict_config_model['cod_prompt_format']= 203.
-resultado = evaluate_context_method(sigla_linguagem,
-            name_model,
-            dict_config_model,
-            dict_config_eval,
-            parm_if_trace=False,
-            parm_if_record=True,
-            parm_interval_print=50)
-results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
-
-
+sigla_linguagem = 'en'
+name_model = "EleutherAI/gpt-neo-1.3B"
 dict_config_model['list_stop_words'] = ['.', '\n','!']
-dict_config_model['cod_prompt_format']= 103.
-resultado = evaluate_context_method(sigla_linguagem,
-            name_model,
-            dict_config_model,
-            dict_config_eval,
-            parm_if_trace=False,
-            parm_if_record=True,
-            parm_interval_print=50)
-results.append([name_model, sigla_linguagem, dict_config_model['cod_prompt_format'], resultado])
-
-
-dict_config_model['cod_prompt_format']= 3.
+dict_config_model['cod_prompt_format']= 102.
 resultado = evaluate_context_method(sigla_linguagem,
             name_model,
             dict_config_model,
