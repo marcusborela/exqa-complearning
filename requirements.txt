@@ -3,7 +3,7 @@ coloredlogs==14.0
 dataclasses;python_version<"3.7"
 numpy>=1.18
 pydantic==1.7.4
-scikit-learn==0.24.2
+scikit-learn==1.0.1
 scipy==1.5.4
 spacy==3.0.6
 tokenizers==0.10.2
